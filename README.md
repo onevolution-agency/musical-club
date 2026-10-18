@@ -60,8 +60,33 @@ update public.profiles set role = 'admin' where email = 'tu-correo@ejemplo.com';
 
 6. Generá `ATTENDANCE_QR_SECRET` con `openssl rand -hex 32`.
 7. Los buckets `avatars` y `receipts` se crean con la migración.
+8. Cargá los datos de prueba (abajo). El seed deja aranceles de ejemplo; antes de producción reemplazalos por los importes reales.
 
-El seed publica Grupo Kids y Grupo Jóvenes y Adultos con el texto de la propuesta y precio 0. Cargá el arancel real en el backoffice antes de generar cuotas.
+### Datos de prueba
+
+`supabase db reset` corre `supabase/seed.sql`. También podés repetirlo sin bajar la base:
+
+```bash
+npm run seed
+```
+
+En local el script usa `postgresql://postgres:postgres@127.0.0.1:54322/postgres` (el Postgres de `supabase start`). Para un proyecto remoto definí `DATABASE_URL` con la connection string de Postgres. El archivo es idempotente: vuelve a crear las actividades de demo, las inscripciones, las sesiones, las cuotas y los pagos, y restablece la contraseña documentada.
+
+Todas las cuentas usan la misma contraseña, **solo desarrollo**: `MusicalClub2026`
+
+| Rol | Email |
+| --- | --- |
+| Admin | `santiago.errecalde@musicalclub.test` |
+| Admin | `gaby.bibas@musicalclub.test` |
+| Profe (Kids sábado y domingo) | `valentina.ruiz@musicalclub.test` |
+| Profe (Jóvenes sábado) | `mateo.alvarez@musicalclub.test` |
+| Profe (Jóvenes sábado y domingo) | `lucia.ferreyra@musicalclub.test` |
+| Alumno Kids | `sofia.herrera@musicalclub.test`, `benjamin.castro@musicalclub.test`, `emma.lopez@musicalclub.test`, `thiago.romero@musicalclub.test`, `olivia.suarez@musicalclub.test`, `joaquin.pereyra@musicalclub.test`, `mia.fernandez@musicalclub.test`, `santino.diaz@musicalclub.test` |
+| Alumno 13+ | `martina.gomez@musicalclub.test`, `franco.iglesias@musicalclub.test`, `camila.ortiz@musicalclub.test`, `nicolas.vega@musicalclub.test`, `julieta.paredes@musicalclub.test`, `agustin.molina@musicalclub.test`, `renata.acosta@musicalclub.test` |
+
+No hay cuentas de padres: cada menor entra con su usuario y el adulto figura como contacto de emergencia. Las edades se calculan al correr el seed para que Kids siga teniendo menos de 12 y el otro grupo 13 o más.
+
+El seed deja cuatro actividades con horario, lugar, cupo y precio (Kids sábado mensual, Kids domingo cada 15 días, Jóvenes sábado mensual con lista de espera, Jóvenes domingo cada 15 días), profes asignados, sesiones cerradas con ausencias y una clase abierta para escanear. En cuotas hay pagos acreditados por Mercado Pago, efectivo con recibo (lo reciben Santiago o Gaby), pendientes, vencidas, un parcial y un efectivo anulado (`REC-1048`). Sofía tiene el mes pago por Mercado Pago; Benjamín y Franco tienen mora; Thiago tiene el efectivo anulado; Olivia tiene un pago parcial del período que viene; Renata está en lista de espera el sábado y activa el domingo.
 
 ### Vercel
 
@@ -84,6 +109,7 @@ El alumno paga solo por Mercado Pago. El único pago manual es efectivo y lo reg
 npm test       # cuotas, asistencia, webhook, copy
 npm run lint
 npm run build
+npm run seed   # datos de prueba; también los corre supabase db reset
 ```
 
 ## Qué incluye
@@ -93,12 +119,13 @@ npm run build
 - Profes: clases asignadas, escaneo de QR con la cámara, marca manual, sin duplicados, historial.
 - Admin: CRUD de actividades (Kids / 13+, horario, lugar, cupo, precio, frecuencia mensual o cada 15 días), profes, alumnos, inscripciones, sesiones, reportes, CSV.
 - Pagos: preferencia de Checkout Pro, webhook con firma e idempotencia, efectivo solo admin, anulación, conciliación.
+- Seed de desarrollo con cuentas de cada rol, actividades, asistencia y cuotas en varios estados.
 
 ## Pendiente
 
 - Credenciales reales de producción (Supabase, Mercado Pago y dominio).
-- El primer admin se promueve a mano en SQL.
-- Los precios del seed están en cero a propósito: la propuesta no publica arancel.
+- En producción el primer admin se promueve a mano en SQL. El seed solo crea admins de prueba.
+- Los precios del seed son importes de ejemplo. La propuesta no publica arancel: cambialos antes de cobrar.
 - No hay facturación fiscal ni recordatorios automáticos de cuota.
 - Los tests cubren la lógica de dominio. No hay e2e contra un proyecto Supabase real.
 - El aviso de instalación de la PWA y el service worker se registran en el build de producción.
