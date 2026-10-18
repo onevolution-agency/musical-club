@@ -1,0 +1,66 @@
+import { ActionForm, SubmitButton } from "@/components/ui/forms";
+import { requireRole } from "@/modules/auth/session";
+import { closeSession, markManual } from "@/modules/attendance/actions";
+import { Scanner } from "@/modules/attendance/scanner";
+import { notFound } from "next/navigation";
+
+export default async function SessionPage({ params }: { params: Promise<{ sessionId: string }> }) {
+  const { sessionId } = await params;
+  const ctx = await requireRole(["teacher", "admin"]);
+  const { data: session } = await ctx.supabase.from("class_sessions").select("*").eq("id", sessionId).maybeSingle();
+  if (!session) notFound();
+  const { data: activity } = await ctx.supabase.from("activities").select("name").eq("id", session.activity_id).maybeSingle();
+  const { data: enrollments } = await ctx.supabase
+    .from("enrollments")
+    .select("student_id, status")
+    .eq("activity_id", session.activity_id)
+    .eq("status", "active");
+  const studentIds = (enrollments ?? []).map((row) => row.student_id);
+  const { data: profiles } = studentIds.length
+    ? await ctx.supabase.from("profiles").select("id, full_name").in("id", studentIds)
+    : { data: [] };
+  const { data: marks } = await ctx.supabase.from("attendance_marks").select("student_id").eq("session_id", sessionId);
+  const present = new Set((marks ?? []).map((mark) => mark.student_id));
+  const roster = (profiles ?? [])
+    .map((profile) => ({ id: profile.id, name: profile.full_name || "Sin nombre", present: present.has(profile.id) }))
+    .sort((a, b) => a.name.localeCompare(b.name, "es"));
+  return (
+    <div className="stack">
+      <h1 className="display" style={{ fontSize: "2rem" }}>
+        {activity?.name ?? "Clase"}
+      </h1>
+      <p>{session.status === "open" ? "Lista abierta" : "Lista cerrada"} · {roster.filter((row) => row.present).length}/{roster.length} presentes</p>
+      {session.status === "open" ? (
+        <>
+          <Scanner sessionId={sessionId} initialRoster={roster} />
+          <section className="stack">
+            <h2 className="display" style={{ fontSize: "1.5rem" }}>
+              Marca manual
+            </h2>
+            {roster.length === 0 ? <p className="empty">No hay alumnos activos en este grupo.</p> : null}
+            {roster.map((row) => (
+              <ActionForm key={row.id} action={markManual} className="row">
+                <input type="hidden" name="sessionId" value={sessionId} />
+                <input type="hidden" name="studentId" value={row.id} />
+                <span style={{ flex: 1 }}>{row.name}</span>
+                <SubmitButton className="btn btn-paper">{row.present ? "Ya está" : "Presente"}</SubmitButton>
+              </ActionForm>
+            ))}
+          </section>
+          <ActionForm action={closeSession}>
+            <input type="hidden" name="sessionId" value={sessionId} />
+            <SubmitButton className="btn btn-ghost">Cerrar clase</SubmitButton>
+          </ActionForm>
+        </>
+      ) : (
+        <ul className="stars">
+          {roster.map((row) => (
+            <li key={row.id}>
+              {row.name} {row.present ? "· presente" : "· ausente"}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
