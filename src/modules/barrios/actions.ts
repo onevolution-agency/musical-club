@@ -21,9 +21,11 @@ export async function chooseBarrio(formData: FormData) {
   const ctx = isSupabaseConfigured() ? await getSessionContext() : null;
 
   if (slug === ALL_BARRIOS) {
-    if (ctx?.profile.role !== "super_admin") return;
+    if (ctx && ctx.profile.role !== "super_admin") return;
     jar.set(BARRIO_COOKIE, ALL_BARRIOS, cookieOptions);
-    await ctx.supabase.from("profiles").update({ current_barrio_id: null }).eq("id", ctx.userId);
+    if (ctx?.profile.role === "super_admin") {
+      await ctx.supabase.from("profiles").update({ current_barrio_id: null }).eq("id", ctx.userId);
+    }
     revalidatePath("/", "layout");
     return;
   }

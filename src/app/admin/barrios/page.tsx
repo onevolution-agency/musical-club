@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
+import { BarrioLogo } from "@/components/brand/barrio-switcher";
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
 import { frequencyLabel } from "@/modules/activities/labels";
 import { saveBarrio } from "@/modules/barrios/actions";
 import { requireRole } from "@/modules/auth/session";
 import { formatARS } from "@/lib/time";
+
+export const metadata: Metadata = { title: { absolute: "Barrios · Musical Club" } };
 
 export default async function BarriosPage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
   const { id } = await searchParams;
@@ -65,8 +69,13 @@ export default async function BarriosPage({ searchParams }: { searchParams: Prom
             {(barrios ?? []).map((barrio) => (
               <tr key={barrio.id}>
                 <td>
-                  <a href={`/admin/barrios?id=${barrio.id}`}>{barrio.name}</a>
-                  <div className="hint">{barrio.slug}</div>
+                  <span className="person">
+                    <BarrioLogo url={barrio.logo_url} />
+                    <span>
+                      <a href={`/admin/barrios?id=${barrio.id}`}>{barrio.name}</a>
+                      <div className="hint">{barrio.slug}</div>
+                    </span>
+                  </span>
                 </td>
                 <td>{formatARS(barrio.default_price_cents)}</td>
                 <td>{frequencyLabel[barrio.default_billing_frequency]}</td>

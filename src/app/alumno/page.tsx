@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { ageGroupCopy, weekdays } from "@/modules/activities/labels";
 import { feeStatusLabel } from "@/modules/activities/labels";
 import { formatARS, formatDateAR } from "@/lib/time";
+
+export const metadata: Metadata = { title: { absolute: "Tu espacio · Musical Club" } };
 
 export default async function StudentHome() {
   const ctx = await requireRole(["student"]);

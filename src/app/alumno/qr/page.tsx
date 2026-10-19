@@ -1,7 +1,10 @@
+import type { Metadata } from "next";
 import QRCode from "qrcode";
 import { attendanceSecret } from "@/lib/env";
 import { requireRole } from "@/modules/auth/session";
 import { signStudentQr } from "@/modules/attendance/domain";
+
+export const metadata: Metadata = { title: { absolute: "Mi QR · Musical Club" } };
 
 export default async function QrPage() {
   const ctx = await requireRole(["student"]);

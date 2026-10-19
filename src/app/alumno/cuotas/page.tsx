@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
 import { requireRole } from "@/modules/auth/session";
 import { feeStatusLabel, paymentMethodLabel, paymentStatusLabel } from "@/modules/activities/labels";
 import { startMercadoPagoCheckout } from "@/modules/payments/actions";
 import { remainingCents, type PaymentSnapshot } from "@/modules/payments/domain";
 import { formatARS, formatDateAR, formatDateTimeAR } from "@/lib/time";
+
+export const metadata: Metadata = { title: { absolute: "Cuotas · Musical Club" } };
 
 export default async function FeesPage({ searchParams }: { searchParams: Promise<{ pago?: string }> }) {
   const params = await searchParams;

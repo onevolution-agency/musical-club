@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Bars } from "@/components/dashboard/charts";
 import { requireRole } from "@/modules/auth/session";
@@ -5,6 +6,8 @@ import type { BarrioRow } from "@/lib/supabase/database.types";
 import { summarizeDashboard } from "@/modules/dashboard/domain";
 import { formatARS, todayInArgentina } from "@/lib/time";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+export const metadata: Metadata = { title: { absolute: "Tablero · Musical Club" } };
 
 export default async function AdminHome({ searchParams }: { searchParams: Promise<{ desde?: string; hasta?: string }> }) {
   const params = await searchParams;

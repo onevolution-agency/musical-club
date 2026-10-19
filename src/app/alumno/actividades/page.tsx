@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
 import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { ageGroupCopy, frequencyLabel } from "@/modules/activities/labels";
 import { cancelEnrollment, enrollSelf } from "@/modules/enrollments/actions";
 import { formatARS } from "@/lib/time";
+
+export const metadata: Metadata = { title: { absolute: "Actividades · Musical Club" } };
 
 export default async function StudentActivities() {
   const ctx = await requireRole(["student"]);

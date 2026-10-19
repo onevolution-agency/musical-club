@@ -117,7 +117,7 @@ npm run seed   # datos de prueba; también los corre supabase db reset
 
 ## Qué incluye
 
-- Sitio público con el copy de la propuesta, ilustraciones propias (blanco, negro y rojo), SEO (metadata, Open Graph, sitemap, robots, canónicos, JSON-LD) y `/llms.txt`.
+- Sitio público con el copy de la propuesta, tipografía y marcas abstractas (negro, rojo y blanco: estrella de pincel, cinta, papel rasgado), SEO (metadata, Open Graph, sitemap, robots, canónicos, JSON-LD) y `/llms.txt`.
 - Multi-barrio: cada barrio ve sus actividades, inscripciones, cuotas, pagos y asistencia. El alta de alumno pide el barrio.
 - Auth de alumnos (contraseña y magic link), perfil con foto, inscripción, horario, cuotas y QR.
 - Profes: clases asignadas, escaneo de QR con la foto del alumno, marca manual, sin duplicados, historial.

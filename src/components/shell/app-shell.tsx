@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/brand/avatar";
 import { BarrioSwitcher } from "@/components/brand/barrio-switcher";
 import { Logo } from "@/components/brand/logo";
+import { BrushStar } from "@/components/brand/marks";
 import { signOut } from "@/modules/auth/actions";
 import type { SessionContext } from "@/modules/auth/session";
 import type { Role } from "@/lib/supabase/database.types";
@@ -65,24 +66,23 @@ export function AppShell({
             </Link>
           ))}
         </nav>
+        <BrushStar className="side-mark" />
       </aside>
       <div className="app-main">
         <header className="app-top">
           <div className="row">
             <Avatar name={ctx.profile.full_name || "Musical Club"} url={ctx.profile.avatar_url} size={48} />
-            <div>
-              <p className="kicker" style={{ margin: 0 }}>
+            <div className="who">
+              <p className="kicker">
                 {kicker}
                 {ctx.barrio ? ` · ${ctx.barrio.name}` : ctx.profile.role === "super_admin" ? " · Todos los barrios" : ""}
               </p>
-              <p className="display" style={{ fontSize: "2rem", margin: 0 }}>
-                {title}
-              </p>
+              <p className="display page-title">{title}</p>
             </div>
           </div>
           <div className="row">
             <BarrioSwitcher
-              options={ctx.barrios.map((barrio) => ({ slug: barrio.slug, name: barrio.name }))}
+              options={ctx.barrios.map((barrio) => ({ slug: barrio.slug, name: barrio.name, logoUrl: barrio.logo_url }))}
               current={ctx.barrio?.slug ?? null}
               allowAll={ctx.profile.role === "super_admin"}
             />

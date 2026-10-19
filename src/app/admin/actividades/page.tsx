@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
 import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { profilesInBarrio } from "@/modules/barrios/members";
 import { saveActivity, assignTeachers } from "@/modules/activities/actions";
 import { ageGroupCopy, frequencyLabel, weekdays } from "@/modules/activities/labels";
 import { copy } from "@/modules/cms/content";
+
+export const metadata: Metadata = { title: { absolute: "Actividades · Musical Club" } };
 
 export default async function AdminActivities({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
   const { id } = await searchParams;

@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import { Avatar } from "@/components/brand/avatar";
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
 import { requireRole } from "@/modules/auth/session";
 import { closeSession, markManual } from "@/modules/attendance/actions";
 import { Scanner } from "@/modules/attendance/scanner";
 import { notFound } from "next/navigation";
+
+export const metadata: Metadata = { title: { absolute: "Sesión · Musical Club" } };
 
 export default async function SessionPage({ params }: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = await params;
@@ -22,13 +25,17 @@ export default async function SessionPage({ params }: { params: Promise<{ sessio
     : { data: [] };
   const { data: marks } = await ctx.supabase.from("attendance_marks").select("student_id").eq("session_id", sessionId);
   const present = new Set((marks ?? []).map((mark) => mark.student_id));
-  const roster = (profiles ?? [])
-    .map((profile) => ({
-      id: profile.id,
-      name: profile.full_name || "Sin nombre",
-      avatarUrl: profile.avatar_url,
-      present: present.has(profile.id),
-    }))
+  const names = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
+  const roster = (enrollments ?? [])
+    .map((enrollment) => {
+      const profile = names.get(enrollment.student_id);
+      return {
+        id: enrollment.student_id,
+        name: profile?.full_name || "Sin nombre",
+        avatarUrl: profile?.avatar_url ?? null,
+        present: present.has(enrollment.student_id),
+      };
+    })
     .sort((a, b) => a.name.localeCompare(b.name, "es"));
   return (
     <div className="stack">

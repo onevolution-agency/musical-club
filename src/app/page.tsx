@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { SiteFooter, SiteHeader } from "@/components/brand/site-chrome";
+import { BrushStar, Scribble } from "@/components/brand/marks";
 import { copy } from "@/modules/cms/content";
 import { JsonLd, organizationGraph } from "@/modules/cms/jsonld";
 import { siteUrl } from "@/lib/env";
@@ -12,26 +12,23 @@ export default function HomePage() {
       <SiteHeader />
       <main id="contenido">
         <section className="hero wrap">
+          <div className="hero-mark" aria-hidden="true">
+            <BrushStar />
+          </div>
           <h1 className="display">
             {copy.heroTitle}
             <span className="banner">{copy.heroBanner}</span>
           </h1>
-          <figure className="torn hero-photo">
-            <Image
-              src="/media/hero.webp"
-              alt="Collage ilustrado del taller: alto contraste en blanco y negro, trazo rojo y papel rasgado"
-              width={1280}
-              height={720}
-              priority
-              sizes="(min-width: 900px) 920px, 100vw"
-            />
-          </figure>
+          <Scribble className="scribble" />
           <p className="byline">{copy.byline}</p>
         </section>
 
         <section className="section" id="experiencia">
-          <div className="wrap panel">
-            <h2 className="display statement">{copy.experience}</h2>
+          <div className="wrap sheet-wrap">
+            <span className="tape tape-tr" aria-hidden="true" />
+            <div className="panel sheet">
+              <h2 className="display statement boxed">{copy.experience}</h2>
+            </div>
           </div>
         </section>
 
@@ -58,26 +55,18 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="section">
-          <div className="wrap photo-row">
-            <figure className="torn">
-              <Image
-                src="/media/photo-family.webp"
-                alt="Ilustración de una familia cantando, con trazo de marcador y estrella roja"
-                width={1100}
-                height={825}
-                sizes="(min-width: 800px) 50vw, 100vw"
-              />
-            </figure>
-            <figure className="torn">
-              <Image
-                src="/media/photo-dance.webp"
-                alt="Ilustración de una pareja bailando, alto contraste y contorno dibujado a mano"
-                width={675}
-                height={900}
-                sizes="(min-width: 800px) 40vw, 100vw"
-              />
-            </figure>
+        <section className="section tight" aria-hidden="true">
+          <div className="wrap sticker-row">
+            <span className="sticker sticker-ink">
+              <BrushStar />
+            </span>
+            <span className="tape tape-inline" />
+            <span className="sticker sticker-red">
+              <BrushStar />
+            </span>
+            <span className="sticker sticker-paper">
+              <BrushStar />
+            </span>
           </div>
         </section>
 
@@ -93,6 +82,7 @@ export default function HomePage() {
               </ul>
             </article>
             <article className="red-panel cta-block" id="integrar">
+              <span className="tape tape-tl" aria-hidden="true" />
               <h2 className="display">{copy.ctaTitle}</h2>
               {copy.ctaBody.map((item) => (
                 <p key={item}>{item}</p>
@@ -106,17 +96,9 @@ export default function HomePage() {
 
         <section className="section" id="logistica">
           <div className="wrap">
+            <div className="torn-edge" aria-hidden="true" />
             <h2 className="display statement">{copy.opsTitle}</h2>
             <p className="kicker">{copy.opsIntro}</p>
-            <figure className="torn" style={{ margin: "1rem 0" }}>
-              <Image
-                src="/media/photo-stage.webp"
-                alt="Ilustración del elenco en el escenario, collage de afiche con papel rasgado"
-                width={1280}
-                height={720}
-                sizes="100vw"
-              />
-            </figure>
             <div className="ops-grid">
               <Ops title={copy.formatTitle} items={copy.format} />
               <Ops title={copy.agesTitle} items={copy.ages} />

@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { formatDateTimeAR } from "@/lib/time";
+
+export const metadata: Metadata = { title: { absolute: "Asistencia · Musical Club" } };
 
 export default async function AdminAttendance({ searchParams }: { searchParams: Promise<{ actividad?: string }> }) {
   const { actividad } = await searchParams;

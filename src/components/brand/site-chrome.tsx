@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { BarrioSwitcher } from "./barrio-switcher";
+import { BarrioSwitcher, type BarrioOption } from "./barrio-switcher";
+import { BrushStar } from "./marks";
 import { Logo } from "./logo";
 import { copy } from "@/modules/cms/content";
 import { listPublicBarrios, publicBarrioSlug } from "@/modules/barrios/public";
@@ -11,13 +12,14 @@ export async function SiteHeader() {
   const current = session?.barrio?.slug ?? (await publicBarrioSlug());
   const space = session ? homeFor(session.role) : "/ingresar";
   const spaceLabel = session ? "Mi espacio" : "Ingresar";
-  const switcher = (
-    <BarrioSwitcher
-      options={barrios.map((barrio) => ({ slug: barrio.slug, name: barrio.name }))}
-      current={current}
-      allowAll={session?.profile.role === "super_admin"}
-    />
-  );
+  const options: BarrioOption[] = barrios.map((barrio) => ({
+    slug: barrio.slug,
+    name: barrio.name,
+    logoUrl: barrio.logo_url,
+  }));
+  const allowAll = !session || session.profile.role === "super_admin";
+  const switcher = <BarrioSwitcher options={options} current={current} allowAll={allowAll} />;
+  const switcherMobile = <BarrioSwitcher options={options} current={current} allowAll={allowAll} />;
   return (
     <header className="site-header">
       <Logo />
@@ -34,7 +36,7 @@ export async function SiteHeader() {
           <Link href="/#experiencia">La propuesta</Link>
           <Link href="/actividades">Actividades</Link>
           <Link href="/contacto">Contacto</Link>
-          {switcher}
+          {switcherMobile}
           <Link href={space}>{spaceLabel}</Link>
         </nav>
       </details>
@@ -46,6 +48,7 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="wrap">
+        <BrushStar className="footer-star" />
         <p className="display statement">{copy.closing}</p>
         <p className="credits">{copy.credits}</p>
         <p className="row">
