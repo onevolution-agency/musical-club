@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
 import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { feeStatusLabel, frequencyLabel } from "@/modules/activities/labels";
@@ -5,6 +6,8 @@ import { generateFees, registerCash } from "@/modules/payments/actions";
 import { remainingCents, type PaymentSnapshot } from "@/modules/payments/domain";
 import { formatARS, formatDateAR, todayInArgentina } from "@/lib/time";
 import type { FeeStatus } from "@/lib/supabase/database.types";
+
+export const metadata: Metadata = { title: { absolute: "Cuotas · Musical Club" } };
 
 export default async function AdminFees({ searchParams }: { searchParams: Promise<{ estado?: string; actividad?: string }> }) {
   const filters = await searchParams;

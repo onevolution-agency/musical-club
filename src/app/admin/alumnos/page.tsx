@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import { Avatar } from "@/components/brand/avatar";
 import { requireRole } from "@/modules/auth/session";
 import { profilesInBarrio } from "@/modules/barrios/members";
+
+export const metadata: Metadata = { title: { absolute: "Alumnos · Musical Club" } };
 
 export default async function StudentsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q } = await searchParams;

@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import { SubmitButton } from "@/components/ui/forms";
 import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { openSession } from "@/modules/attendance/actions";
 import { ageGroupCopy } from "@/modules/activities/labels";
 import { formatDateTimeAR } from "@/lib/time";
+
+export const metadata: Metadata = { title: { absolute: "Clases · Musical Club" } };
 
 export default async function TeacherHome() {
   const ctx = await requireRole(["teacher", "admin"]);

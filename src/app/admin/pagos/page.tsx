@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
 import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { paymentMethodLabel, paymentStatusLabel } from "@/modules/activities/labels";
@@ -5,6 +6,8 @@ import { voidCashPayment } from "@/modules/payments/actions";
 import { reconcileCash } from "@/modules/payments/domain";
 import { formatARS, formatDateTimeAR, todayInArgentina } from "@/lib/time";
 import type { PaymentStatus } from "@/lib/supabase/database.types";
+
+export const metadata: Metadata = { title: { absolute: "Pagos · Musical Club" } };
 
 export default async function PaymentsPage({
   searchParams,

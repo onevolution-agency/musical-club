@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
 import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { profilesInBarrio } from "@/modules/barrios/members";
 import { adminEnroll, setEnrollmentStatus } from "@/modules/enrollments/actions";
 import { todayInArgentina } from "@/lib/time";
 import type { EnrollmentStatus } from "@/lib/supabase/database.types";
+
+export const metadata: Metadata = { title: { absolute: "Inscripciones · Musical Club" } };
 
 export default async function EnrollmentsPage({ searchParams }: { searchParams: Promise<{ estado?: string; actividad?: string }> }) {
   const filters = await searchParams;

@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import { Avatar } from "@/components/brand/avatar";
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
 import { profilesInBarrio } from "@/modules/barrios/members";
 import { requireRole } from "@/modules/auth/session";
 import { inviteStaff, setUserRole } from "@/modules/teachers/actions";
+
+export const metadata: Metadata = { title: { absolute: "Profesores · Musical Club" } };
 
 export default async function TeachersPage() {
   const ctx = await requireRole(["admin"]);

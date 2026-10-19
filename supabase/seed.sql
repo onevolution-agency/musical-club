@@ -65,15 +65,16 @@ declare
 begin
   perform set_config('request.jwt.claim.role', 'service_role', true);
 
-  insert into public.barrios (id, slug, name, active, default_price_cents, default_billing_frequency)
+  insert into public.barrios (id, slug, name, logo_url, active, default_price_cents, default_billing_frequency)
   values
-    ('b1000000-0000-4000-8000-000000000001', 'el-talar', 'El Talar', true, 4500000, 'monthly'),
-    ('b1000000-0000-4000-8000-000000000002', 'club-nordelta', 'Club Nordelta', true, 2400000, 'biweekly')
+    ('b1000000-0000-4000-8000-000000000001', 'el-talar', 'El Talar', '/icons/icon-192.png', true, 4500000, 'monthly'),
+    ('b1000000-0000-4000-8000-000000000002', 'club-nordelta', 'Club Nordelta', '/icons/icon-on-red-192.png', true, 2400000, 'biweekly')
   on conflict (slug) do update set
     name = excluded.name,
     active = excluded.active,
     default_price_cents = excluded.default_price_cents,
-    default_billing_frequency = excluded.default_billing_frequency;
+    default_billing_frequency = excluded.default_billing_frequency,
+    logo_url = coalesce(public.barrios.logo_url, excluded.logo_url);
 
   drop table if exists seed_people;
   create temp table seed_people (

@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { formatDateTimeAR } from "@/lib/time";
+
+export const metadata: Metadata = { title: { absolute: "Historial · Musical Club" } };
 
 export default async function TeacherHistory() {
   const ctx = await requireRole(["teacher", "admin"]);

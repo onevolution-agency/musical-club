@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { formatDateTimeAR } from "@/lib/time";
+
+export const metadata: Metadata = { title: { absolute: "Consultas · Musical Club" } };
 
 export default async function InquiriesPage() {
   const ctx = await requireRole(["admin"]);
