@@ -1,5 +1,5 @@
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
-import { requireRole } from "@/modules/auth/session";
+import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { paymentMethodLabel, paymentStatusLabel } from "@/modules/activities/labels";
 import { voidCashPayment } from "@/modules/payments/actions";
 import { reconcileCash } from "@/modules/payments/domain";
@@ -16,7 +16,7 @@ export default async function PaymentsPage({
   const today = todayInArgentina();
   const from = filters.desde || `${today.slice(0, 8)}01`;
   const to = filters.hasta || today;
-  let query = ctx.supabase.from("payments").select("*").order("created_at", { ascending: false }).limit(300);
+  let query = scopeBarrio(ctx.supabase.from("payments").select("*").order("created_at", { ascending: false }).limit(300), ctx.barrioId);
   const statuses: PaymentStatus[] = ["pending", "approved", "rejected", "void"];
   if (filters.medio === "mercadopago" || filters.medio === "efectivo") query = query.eq("method", filters.medio);
   if (filters.estado && statuses.includes(filters.estado as PaymentStatus)) {

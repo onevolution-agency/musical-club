@@ -38,5 +38,9 @@ describe("demo seed", () => {
     expect(seed).toContain("'mercadopago'");
     expect(seed).toContain("'efectivo'");
     expect(seed).toContain("REC-1048");
+    expect(seed).toContain("el-talar");
+    expect(seed).toContain("club-nordelta");
+    expect(seed).toContain("super_admin");
+    expect(seed).toContain("barrio_memberships");
   });
 });

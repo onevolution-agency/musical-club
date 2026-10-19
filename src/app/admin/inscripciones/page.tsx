@@ -1,5 +1,6 @@
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
-import { requireRole } from "@/modules/auth/session";
+import { requireRole, scopeBarrio } from "@/modules/auth/session";
+import { profilesInBarrio } from "@/modules/barrios/members";
 import { adminEnroll, setEnrollmentStatus } from "@/modules/enrollments/actions";
 import { todayInArgentina } from "@/lib/time";
 import type { EnrollmentStatus } from "@/lib/supabase/database.types";
@@ -8,14 +9,14 @@ export default async function EnrollmentsPage({ searchParams }: { searchParams: 
   const filters = await searchParams;
   const ctx = await requireRole(["admin"]);
   const statuses: EnrollmentStatus[] = ["pending", "active", "waitlist", "cancelled", "completed"];
-  let query = ctx.supabase.from("enrollments").select("*").order("created_at", { ascending: false }).limit(200);
+  let query = scopeBarrio(ctx.supabase.from("enrollments").select("*").order("created_at", { ascending: false }).limit(200), ctx.barrioId);
   if (filters.estado && statuses.includes(filters.estado as EnrollmentStatus)) {
     query = query.eq("status", filters.estado as EnrollmentStatus);
   }
   if (filters.actividad) query = query.eq("activity_id", filters.actividad);
   const { data: enrollments } = await query;
-  const { data: activities } = await ctx.supabase.from("activities").select("id, name");
-  const { data: students } = await ctx.supabase.from("profiles").select("id, full_name, email").eq("role", "student");
+  const { data: activities } = await scopeBarrio(ctx.supabase.from("activities").select("id, name"), ctx.barrioId);
+  const students = await profilesInBarrio(ctx, ["student"]);
   return (
     <div className="stack">
       <h1 className="display" style={{ fontSize: "2.2rem" }}>

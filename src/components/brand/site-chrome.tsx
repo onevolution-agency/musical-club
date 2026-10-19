@@ -1,10 +1,23 @@
 import Link from "next/link";
+import { BarrioSwitcher } from "./barrio-switcher";
 import { Logo } from "./logo";
 import { copy } from "@/modules/cms/content";
+import { listPublicBarrios, publicBarrioSlug } from "@/modules/barrios/public";
 import { getSessionContext, homeFor } from "@/modules/auth/session";
 
 export async function SiteHeader() {
   const session = await getSessionContext();
+  const barrios = session?.barrios.length ? session.barrios : await listPublicBarrios();
+  const current = session?.barrio?.slug ?? (await publicBarrioSlug());
+  const space = session ? homeFor(session.role) : "/ingresar";
+  const spaceLabel = session ? "Mi espacio" : "Ingresar";
+  const switcher = (
+    <BarrioSwitcher
+      options={barrios.map((barrio) => ({ slug: barrio.slug, name: barrio.name }))}
+      current={current}
+      allowAll={session?.profile.role === "super_admin"}
+    />
+  );
   return (
     <header className="site-header">
       <Logo />
@@ -12,7 +25,8 @@ export async function SiteHeader() {
         <Link href="/#experiencia">La propuesta</Link>
         <Link href="/actividades">Actividades</Link>
         <Link href="/contacto">Contacto</Link>
-        {session ? <Link href={homeFor(session.profile.role)}>Mi espacio</Link> : <Link href="/ingresar">Ingresar</Link>}
+        {switcher}
+        <Link href={space}>{spaceLabel}</Link>
       </nav>
       <details className="nav-toggle">
         <summary>Menú</summary>
@@ -20,7 +34,8 @@ export async function SiteHeader() {
           <Link href="/#experiencia">La propuesta</Link>
           <Link href="/actividades">Actividades</Link>
           <Link href="/contacto">Contacto</Link>
-          {session ? <Link href={homeFor(session.profile.role)}>Mi espacio</Link> : <Link href="/ingresar">Ingresar</Link>}
+          {switcher}
+          <Link href={space}>{spaceLabel}</Link>
         </nav>
       </details>
     </header>

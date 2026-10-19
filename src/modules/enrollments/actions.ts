@@ -14,6 +14,9 @@ export async function enrollSelf(formData: FormData): Promise<ActionResult> {
   if (!activityId) return { ok: false, error: "Falta la actividad." };
   const { data: activity } = await ctx.supabase.from("activities").select("*").eq("id", activityId).maybeSingle();
   if (!activity || activity.status !== "active") return { ok: false, error: "Esa actividad no está abierta." };
+  if (!ctx.memberships.some((row) => row.barrio_id === activity.barrio_id && row.role === "student")) {
+    return { ok: false, error: "Esta actividad es de otro barrio." };
+  }
 
   const { count } = await ctx.supabase
     .from("enrollments")

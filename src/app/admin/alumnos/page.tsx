@@ -1,12 +1,11 @@
+import { Avatar } from "@/components/brand/avatar";
 import { requireRole } from "@/modules/auth/session";
+import { profilesInBarrio } from "@/modules/barrios/members";
 
 export default async function StudentsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q } = await searchParams;
   const ctx = await requireRole(["admin"]);
-  const term = (q ?? "").replace(/[%_,.()]/g, "").trim().slice(0, 60);
-  let query = ctx.supabase.from("profiles").select("*").eq("role", "student").order("full_name").limit(100);
-  if (term) query = query.or(`full_name.ilike.%${term}%,email.ilike.%${term}%`);
-  const { data: students } = await query;
+  const students = await profilesInBarrio(ctx, ["student"], q ?? "");
   return (
     <div className="stack">
       <h1 className="display" style={{ fontSize: "2.2rem" }}>
@@ -33,7 +32,12 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
           <tbody>
             {(students ?? []).map((student) => (
               <tr key={student.id}>
-                <td>{student.full_name}</td>
+                <td>
+                  <span className="person">
+                    <Avatar name={student.full_name || "Alumno"} url={student.avatar_url} size={36} />
+                    {student.full_name}
+                  </span>
+                </td>
                 <td>{student.email}</td>
                 <td>{student.phone}</td>
                 <td>{student.dni}</td>

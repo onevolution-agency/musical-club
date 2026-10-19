@@ -1,10 +1,13 @@
 import Link from "next/link";
-import { requireRole } from "@/modules/auth/session";
+import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { formatDateTimeAR } from "@/lib/time";
 
 export default async function TeacherHistory() {
   const ctx = await requireRole(["teacher", "admin"]);
-  const { data: assignments } = await ctx.supabase.from("activity_teachers").select("activity_id").eq("teacher_id", ctx.userId);
+  const { data: assignments } = await scopeBarrio(
+    ctx.supabase.from("activity_teachers").select("activity_id").eq("teacher_id", ctx.userId),
+    ctx.barrioId,
+  );
   const ids = (assignments ?? []).map((row) => row.activity_id);
   const { data: sessions } = ids.length
     ? await ctx.supabase.from("class_sessions").select("*").in("activity_id", ids).order("starts_at", { ascending: false }).limit(40)

@@ -43,10 +43,12 @@ export async function generateFees(formData?: FormData): Promise<ActionResult> {
   const ctx = await requireRole(["admin"]);
   const until = String(formData?.get("until") ?? todayInArgentina());
   const admin = createAdminClient() ?? ctx.supabase;
-  const { data: enrollments } = await admin
+  let enrollmentQuery = admin
     .from("enrollments")
-    .select("id, student_id, activity_id, starts_on, status")
+    .select("id, student_id, activity_id, starts_on, status, barrio_id")
     .eq("status", "active");
+  if (ctx.barrioId) enrollmentQuery = enrollmentQuery.eq("barrio_id", ctx.barrioId);
+  const { data: enrollments } = await enrollmentQuery;
   const { data: activities } = await admin.from("activities").select("id, price_cents, billing_frequency, name");
   const activityMap = new Map((activities ?? []).map((activity) => [activity.id, activity]));
   const { data: existing } = await admin.from("fees").select("enrollment_id, period_start");

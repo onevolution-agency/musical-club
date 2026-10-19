@@ -1,10 +1,12 @@
+import { Avatar } from "@/components/brand/avatar";
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
+import { profilesInBarrio } from "@/modules/barrios/members";
 import { requireRole } from "@/modules/auth/session";
 import { inviteStaff, setUserRole } from "@/modules/teachers/actions";
 
 export default async function TeachersPage() {
   const ctx = await requireRole(["admin"]);
-  const { data: teachers } = await ctx.supabase.from("profiles").select("*").in("role", ["teacher", "admin"]).order("full_name");
+  const teachers = await profilesInBarrio(ctx, ["teacher", "admin"]);
   return (
     <div className="stack">
       <h1 className="display" style={{ fontSize: "2.2rem" }}>
@@ -40,12 +42,17 @@ export default async function TeachersPage() {
           <tbody>
             {(teachers ?? []).map((person) => (
               <tr key={person.id}>
-                <td>{person.full_name}</td>
+                <td>
+                  <span className="person">
+                    <Avatar name={person.full_name || "Profe"} url={person.avatar_url} size={36} />
+                    {person.full_name}
+                  </span>
+                </td>
                 <td>{person.email}</td>
                 <td>
                   <ActionForm action={setUserRole} className="row">
                     <input type="hidden" name="userId" value={person.id} />
-                    <select name="role" defaultValue={person.role}>
+                    <select name="role" defaultValue={person.membershipRole}>
                       <option value="teacher">Profesor</option>
                       <option value="admin">Admin</option>
                       <option value="student">Alumno</option>

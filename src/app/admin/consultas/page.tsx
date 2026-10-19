@@ -1,9 +1,12 @@
-import { requireRole } from "@/modules/auth/session";
+import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { formatDateTimeAR } from "@/lib/time";
 
 export default async function InquiriesPage() {
   const ctx = await requireRole(["admin"]);
-  const { data: inquiries } = await ctx.supabase.from("inquiries").select("*").order("created_at", { ascending: false }).limit(100);
+  const { data: inquiries } = await scopeBarrio(
+    ctx.supabase.from("inquiries").select("*").order("created_at", { ascending: false }).limit(100),
+    ctx.barrioId,
+  );
   return (
     <div className="stack">
       <h1 className="display" style={{ fontSize: "2.2rem" }}>

@@ -7,7 +7,7 @@ import type { ActionResult } from "@/modules/auth/actions";
 import { attendanceMessage, evaluateAttendance, verifyStudentQr } from "./domain";
 
 export type ScanResult =
-  | { ok: true; studentId: string; message: string }
+  | { ok: true; studentId: string; message: string; avatarUrl: string | null }
   | { ok: false; code: string; message: string };
 
 async function mark(sessionId: string, studentId: string, method: "qr" | "manual"): Promise<ScanResult> {
@@ -33,7 +33,7 @@ async function mark(sessionId: string, studentId: string, method: "qr" | "manual
     enrollment: enrollment ? { activityId: enrollment.activity_id, status: enrollment.status } : null,
     alreadyMarked: Boolean(existing),
   });
-  const { data: profile } = await ctx.supabase.from("profiles").select("full_name").eq("id", studentId).maybeSingle();
+  const { data: profile } = await ctx.supabase.from("profiles").select("full_name, avatar_url").eq("id", studentId).maybeSingle();
   if (!decision.ok) {
     return { ok: false, code: decision.code, message: attendanceMessage(decision.code, profile?.full_name || undefined) };
   }
@@ -51,7 +51,12 @@ async function mark(sessionId: string, studentId: string, method: "qr" | "manual
     return { ok: false, code: "invalid_qr", message: "No pudimos guardar la asistencia." };
   }
   revalidatePath(`/profesor/sesion/${sessionId}`);
-  return { ok: true, studentId, message: `${profile?.full_name || "Alumno"} está presente.` };
+  return {
+    ok: true,
+    studentId,
+    avatarUrl: profile?.avatar_url ?? null,
+    message: `${profile?.full_name || "Alumno"} está presente.`,
+  };
 }
 
 export async function scanAttendance(sessionId: string, token: string): Promise<ScanResult> {

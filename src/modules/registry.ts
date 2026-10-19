@@ -7,7 +7,12 @@ export const modules = [
   {
     id: "auth",
     title: "Acceso y roles",
-    summary: "Alumnos, profesores y admin. Email, contraseña y magic link.",
+    summary: "Alumnos, profesores, admin de barrio y super admin. Email, contraseña y magic link.",
+  },
+  {
+    id: "barrios",
+    title: "Barrios",
+    summary: "Cada barrio es un tenant: actividades, cuotas, pagos y asistencia quedan aislados.",
   },
   {
     id: "activities",

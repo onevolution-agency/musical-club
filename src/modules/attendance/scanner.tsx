@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Avatar } from "@/components/brand/avatar";
 import { scanAttendance, type ScanResult } from "./actions";
 
-type RosterRow = { id: string; name: string; present: boolean };
+type RosterRow = { id: string; name: string; present: boolean; avatarUrl?: string | null };
 
 export function Scanner({ sessionId, initialRoster }: { sessionId: string; initialRoster: RosterRow[] }) {
   const [roster, setRoster] = useState(initialRoster);
@@ -28,7 +29,11 @@ export function Scanner({ sessionId, initialRoster }: { sessionId: string; initi
             const result = await scanAttendance(sessionId, text);
             setFeedback(result);
             if (result.ok) {
-              setRoster((current) => current.map((row) => (row.id === result.studentId ? { ...row, present: true } : row)));
+              setRoster((current) =>
+                current.map((row) =>
+                  row.id === result.studentId ? { ...row, present: true, avatarUrl: result.avatarUrl ?? row.avatarUrl } : row,
+                ),
+              );
               navigator.vibrate?.(40);
             } else {
               navigator.vibrate?.([40, 40, 40]);
@@ -55,13 +60,16 @@ export function Scanner({ sessionId, initialRoster }: { sessionId: string; initi
       {cameraError ? <p className="form-error">{cameraError}</p> : <p className="hint">Apuntá al QR del alumno. Si ya estaba, no se duplica.</p>}
       {feedback ? (
         <p className={feedback.ok ? "feedback feedback-ok" : "feedback feedback-bad"} role="status" aria-live="polite">
-          {feedback.message}
+          {feedback.ok ? <Avatar name={feedback.message} url={feedback.avatarUrl} size={44} /> : null} {feedback.message}
         </p>
       ) : null}
       <ul className="stars">
         {roster.map((row) => (
           <li key={row.id}>
-            {row.name} {row.present ? "· presente" : "· ausente"}
+            <span className="person">
+              <Avatar name={row.name} url={row.avatarUrl} size={44} />
+              {row.name} {row.present ? "· presente" : "· ausente"}
+            </span>
           </li>
         ))}
       </ul>

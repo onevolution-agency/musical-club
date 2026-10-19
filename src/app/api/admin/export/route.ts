@@ -1,4 +1,4 @@
-import { requireRole } from "@/modules/auth/session";
+import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { toCsv } from "@/modules/dashboard/domain";
 import { todayInArgentina } from "@/lib/time";
 
@@ -11,7 +11,10 @@ export async function GET(request: Request) {
   const to = url.searchParams.get("hasta") ?? today;
 
   if (tipo === "cuotas") {
-    const { data } = await ctx.supabase.from("fees").select("id, student_id, activity_id, period_start, due_date, amount_cents, status").limit(2000);
+    const { data } = await scopeBarrio(
+      ctx.supabase.from("fees").select("id, student_id, activity_id, period_start, due_date, amount_cents, status").limit(2000),
+      ctx.barrioId,
+    );
     const csv = toCsv(
       ["id", "alumno", "actividad", "periodo", "vence", "centavos", "estado"],
       (data ?? []).map((fee) => [fee.id, fee.student_id, fee.activity_id, fee.period_start, fee.due_date, String(fee.amount_cents), fee.status]),
@@ -20,7 +23,10 @@ export async function GET(request: Request) {
   }
 
   if (tipo === "asistencia") {
-    const { data } = await ctx.supabase.from("attendance_marks").select("session_id, student_id, method, marked_at").limit(5000);
+    const { data } = await scopeBarrio(
+      ctx.supabase.from("attendance_marks").select("session_id, student_id, method, marked_at").limit(5000),
+      ctx.barrioId,
+    );
     const csv = toCsv(
       ["sesion", "alumno", "metodo", "fecha"],
       (data ?? []).map((mark) => [mark.session_id, mark.student_id, mark.method, mark.marked_at]),
@@ -28,7 +34,7 @@ export async function GET(request: Request) {
     return csvResponse(csv, "asistencia.csv");
   }
 
-  const { data } = await ctx.supabase.from("payments").select("*").limit(2000);
+  const { data } = await scopeBarrio(ctx.supabase.from("payments").select("*").limit(2000), ctx.barrioId);
   const rows = (data ?? []).filter((payment) => {
     const day = (payment.paid_at ?? payment.created_at).slice(0, 10);
     return day >= from && day <= to;

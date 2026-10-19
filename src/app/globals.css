@@ -16,6 +16,15 @@
   --blood: #e10600;
   --gold: #e2b33c;
   --line: rgba(246, 241, 231, 0.16);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --touch: 48px;
 }
 
 * { box-sizing: border-box; }
@@ -33,7 +42,7 @@ body::before {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background-image: url("/media/newsprint.jpg");
+  background-image: url("/media/newsprint.webp");
   background-size: 680px;
   opacity: 0.45;
   mix-blend-mode: screen;
@@ -176,7 +185,7 @@ input, select, textarea {
 textarea { min-height: 120px; resize: vertical; }
 .form-error, .form-ok { margin: 0.4rem 0; }
 .form-error { color: #ffb4a8; }
-.form-ok { color: #b7f5c2; }
+.form-ok { color: var(--gold); }
 .hint { color: #c8c2b6; font-size: 0.95rem; }
 .stack { display: grid; gap: 0.8rem; }
 .row { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
@@ -201,7 +210,46 @@ textarea { min-height: 120px; resize: vertical; }
 table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
 th, td { text-align: left; padding: 0.55rem 0.4rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 .table-wrap { overflow-x: auto; }
-.empty { padding: 1.2rem; border: 1px dashed var(--line); }
+.empty, .state-loading, .state-error {
+  padding: var(--space-5);
+  border: 1px dashed var(--line);
+  background:
+    linear-gradient(180deg, rgba(225, 6, 0, 0.16), transparent 42%),
+    #070707;
+}
+.empty::before, .state-loading::before {
+  content: "★ ";
+  color: var(--blood);
+  font-family: var(--font-display);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 0;
+  object-fit: cover;
+  background: var(--paper);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 2px solid var(--blood);
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+}
+.avatar-fallback { background: var(--paper); }
+.barrio-switch select { min-height: var(--touch); min-width: 11rem; background: #111; }
+.person { display: flex; align-items: center; gap: var(--space-3); }
 
 .app-shell { display: grid; min-height: 100vh; }
 .app-side {
@@ -210,7 +258,8 @@ th, td { text-align: left; padding: 0.55rem 0.4rem; border-bottom: 1px solid var
   border-right: 1px solid var(--line);
   padding: 1rem;
 }
-.app-side a { display: block; text-decoration: none; padding: 0.55rem 0.2rem; font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.04em; }
+.app-side nav { margin-top: var(--space-4); display: grid; }
+.app-side a { display: flex; align-items: center; min-height: var(--touch); text-decoration: none; padding: 0 var(--space-2); font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.04em; }
 .app-main { padding: 1rem 1rem 6rem; }
 .app-top { display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; margin-bottom: 1rem; }
 .tabbar {
@@ -223,14 +272,14 @@ th, td { text-align: left; padding: 0.55rem 0.4rem; border-bottom: 1px solid var
   z-index: 12;
   padding-bottom: env(safe-area-inset-bottom);
 }
-.tabbar a { text-align: center; text-decoration: none; padding: 0.75rem 0.2rem; font-size: 0.78rem; font-family: var(--font-display); text-transform: uppercase; }
+.tabbar a { display: flex; align-items: center; justify-content: center; min-height: var(--touch); text-align: center; text-decoration: none; padding: var(--space-2); font-size: 0.78rem; font-family: var(--font-display); text-transform: uppercase; }
 
 .qr-frame { background: white; padding: 0.8rem; width: min(100%, 360px); }
 .qr-frame img { width: 100%; height: auto; }
 .scanner-shell { display: grid; gap: 0.8rem; }
 #qr-reader { background: #000; min-height: 260px; overflow: hidden; }
 .feedback { padding: 0.9rem; font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.03em; }
-.feedback-ok { background: #146c36; }
+.feedback-ok { background: #1a1a1a; border-left: 4px solid var(--gold); }
 .feedback-bad { background: var(--blood); }
 .install-banner {
   position: fixed;

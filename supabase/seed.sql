@@ -7,7 +7,11 @@
 -- No hay cuentas de padres: los menores son alumnos y el adulto queda
 -- como contacto de emergencia.
 --
--- Admins
+-- Barrios de demo: El Talar (sábados, mensual) y Club Nordelta (domingos, cada 15 días).
+-- Santiago y Gaby son super admin y ven los dos. Valentina, Lucía, Joaquín y Julieta
+-- pertenecen a los dos barrios.
+--
+-- Super admin
 --   santiago.errecalde@musicalclub.test
 --   gaby.bibas@musicalclub.test
 -- Profes
@@ -61,6 +65,16 @@ declare
 begin
   perform set_config('request.jwt.claim.role', 'service_role', true);
 
+  insert into public.barrios (id, slug, name, active, default_price_cents, default_billing_frequency)
+  values
+    ('b1000000-0000-4000-8000-000000000001', 'el-talar', 'El Talar', true, 4500000, 'monthly'),
+    ('b1000000-0000-4000-8000-000000000002', 'club-nordelta', 'Club Nordelta', true, 2400000, 'biweekly')
+  on conflict (slug) do update set
+    name = excluded.name,
+    active = excluded.active,
+    default_price_cents = excluded.default_price_cents,
+    default_billing_frequency = excluded.default_billing_frequency;
+
   drop table if exists seed_people;
   create temp table seed_people (
     id uuid primary key,
@@ -103,8 +117,8 @@ begin
     raise exception 'Hay un usuario con mail de demo y otro id. Corré supabase db reset o borrá esas cuentas.';
   end if;
 
-  insert into public.staff_invites (email, role, full_name, token, expires_at)
-  select p.email, p.role, p.full_name, 'seed-' || p.id::text, now() + interval '365 days'
+  insert into public.staff_invites (email, role, full_name, token, expires_at, barrio_id)
+  select p.email, p.role, p.full_name, 'seed-' || p.id::text, now() + interval '365 days', 'b1000000-0000-4000-8000-000000000001'
   from seed_people p
   where p.role in ('admin', 'teacher')
     and not exists (select 1 from auth.users u where u.id = p.id)
@@ -211,15 +225,61 @@ begin
 
   update public.profiles pr
   set
-    role = p.role,
+    role = case
+      when lower(p.email) in ('santiago.errecalde@musicalclub.test', 'gaby.bibas@musicalclub.test') then 'super_admin'
+      else p.role
+    end,
     full_name = p.full_name,
     email = p.email,
     phone = p.phone,
     dni = p.dni,
     birth_date = p.birth_date,
-    emergency_contact = p.emergency_contact
+    emergency_contact = p.emergency_contact,
+    current_barrio_id = case
+      when p.email in (
+        'mia.fernandez@musicalclub.test',
+        'santino.diaz@musicalclub.test',
+        'agustin.molina@musicalclub.test',
+        'renata.acosta@musicalclub.test'
+      ) then 'b1000000-0000-4000-8000-000000000002'::uuid
+      else 'b1000000-0000-4000-8000-000000000001'::uuid
+    end
   from seed_people p
   where pr.id = p.id;
+
+  delete from public.barrio_memberships where user_id in (select id from seed_people);
+
+  insert into public.barrio_memberships (user_id, barrio_id, role)
+  select
+    p.id,
+    'b1000000-0000-4000-8000-000000000001',
+    case when p.email in ('santiago.errecalde@musicalclub.test', 'gaby.bibas@musicalclub.test') then 'admin' else p.role end
+  from seed_people p
+  where p.email not in (
+    'mia.fernandez@musicalclub.test',
+    'santino.diaz@musicalclub.test',
+    'agustin.molina@musicalclub.test',
+    'renata.acosta@musicalclub.test'
+  );
+
+  insert into public.barrio_memberships (user_id, barrio_id, role)
+  select
+    p.id,
+    'b1000000-0000-4000-8000-000000000002',
+    case when p.email in ('santiago.errecalde@musicalclub.test', 'gaby.bibas@musicalclub.test') then 'admin' else p.role end
+  from seed_people p
+  where p.email in (
+    'santiago.errecalde@musicalclub.test',
+    'gaby.bibas@musicalclub.test',
+    'valentina.ruiz@musicalclub.test',
+    'lucia.ferreyra@musicalclub.test',
+    'joaquin.pereyra@musicalclub.test',
+    'mia.fernandez@musicalclub.test',
+    'santino.diaz@musicalclub.test',
+    'julieta.paredes@musicalclub.test',
+    'agustin.molina@musicalclub.test',
+    'renata.acosta@musicalclub.test'
+  );
 
   delete from public.payments pay
   using public.fees f, public.activities a
@@ -234,11 +294,12 @@ begin
   where slug in ('grupo-kids', 'grupo-kids-domingo', 'jovenes-y-adultos', 'jovenes-domingo');
 
   insert into public.activities (
-    id, slug, name, description, age_group, schedule_label, weekday, start_time, end_time,
+    id, barrio_id, slug, name, description, age_group, schedule_label, weekday, start_time, end_time,
     location, capacity, price_cents, currency, billing_frequency, status
   ) values
     (
       'd1111111-1111-4111-8111-000000000001',
+      'b1000000-0000-4000-8000-000000000001',
       'grupo-kids',
       'Grupo Kids',
       'Grupo Kids: Niños y niñas hasta los 12 años.',
@@ -256,6 +317,7 @@ begin
     ),
     (
       'd1111111-1111-4111-8111-000000000002',
+      'b1000000-0000-4000-8000-000000000002',
       'grupo-kids-domingo',
       'Grupo Kids · Domingos',
       'Grupo Kids: Niños y niñas hasta los 12 años.',
@@ -273,6 +335,7 @@ begin
     ),
     (
       'd1111111-1111-4111-8111-000000000003',
+      'b1000000-0000-4000-8000-000000000001',
       'jovenes-y-adultos',
       'Grupo Jóvenes y Adultos',
       'Grupo Jóvenes y Adultos: A partir de 13 años (sin límite de edad).',
@@ -290,6 +353,7 @@ begin
     ),
     (
       'd1111111-1111-4111-8111-000000000004',
+      'b1000000-0000-4000-8000-000000000002',
       'jovenes-domingo',
       'Grupo Jóvenes y Adultos · Domingos',
       'Grupo Jóvenes y Adultos: A partir de 13 años (sin límite de edad).',

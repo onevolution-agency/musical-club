@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const PAYMENT_METHODS = ["mercadopago", "efectivo"] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
-export type Role = "student" | "teacher" | "admin";
+export type Role = "student" | "teacher" | "admin" | "super_admin";
 export type BillingFrequency = "monthly" | "biweekly";
 export type FeeStatus = "pending" | "partial" | "paid" | "overdue" | "void";
 export type PaymentStatus = "pending" | "approved" | "rejected" | "void";
@@ -187,7 +187,7 @@ export function remainingCents(fee: FeeSnapshot, payments: PaymentSnapshot[]): n
 }
 
 export function assertCanRegisterCash(role: Role): void {
-  if (role !== "admin") {
+  if (role !== "admin" && role !== "super_admin") {
     throw new DomainError("forbidden", "Solo un admin puede registrar un pago en efectivo.");
   }
 }
@@ -253,7 +253,7 @@ export function voidPayment(
   reason: string,
   today: string,
 ): Ledger {
-  if (actor.role !== "admin") {
+  if (actor.role !== "admin" && actor.role !== "super_admin") {
     throw new DomainError("forbidden", "Solo un admin puede anular un pago.");
   }
   const payment = ledger.payments.find((item) => item.id === paymentId);

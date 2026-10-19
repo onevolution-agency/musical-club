@@ -1,14 +1,14 @@
 import Link from "next/link";
-import { requireRole } from "@/modules/auth/session";
+import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { formatDateTimeAR } from "@/lib/time";
 
 export default async function AdminAttendance({ searchParams }: { searchParams: Promise<{ actividad?: string }> }) {
   const { actividad } = await searchParams;
   const ctx = await requireRole(["admin"]);
-  let sessionsQuery = ctx.supabase.from("class_sessions").select("*").order("starts_at", { ascending: false }).limit(80);
+  let sessionsQuery = scopeBarrio(ctx.supabase.from("class_sessions").select("*").order("starts_at", { ascending: false }).limit(80), ctx.barrioId);
   if (actividad) sessionsQuery = sessionsQuery.eq("activity_id", actividad);
   const { data: sessions } = await sessionsQuery;
-  const { data: activities } = await ctx.supabase.from("activities").select("id, name");
+  const { data: activities } = await scopeBarrio(ctx.supabase.from("activities").select("id, name"), ctx.barrioId);
   const ids = (sessions ?? []).map((session) => session.id);
   const { data: marks } = ids.length ? await ctx.supabase.from("attendance_marks").select("session_id, student_id").in("session_id", ids) : { data: [] };
   return (

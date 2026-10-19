@@ -1,26 +1,27 @@
 import Link from "next/link";
-import { requireRole } from "@/modules/auth/session";
+import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { ageGroupCopy, weekdays } from "@/modules/activities/labels";
 import { feeStatusLabel } from "@/modules/activities/labels";
 import { formatARS, formatDateAR } from "@/lib/time";
 
 export default async function StudentHome() {
   const ctx = await requireRole(["student"]);
-  const { data: enrollments } = await ctx.supabase
-    .from("enrollments")
-    .select("id, status, activity_id, starts_on")
-    .eq("student_id", ctx.userId)
-    .in("status", ["active", "pending", "waitlist"]);
+  const { data: enrollments } = await scopeBarrio(
+    ctx.supabase
+      .from("enrollments")
+      .select("id, status, activity_id, starts_on")
+      .eq("student_id", ctx.userId)
+      .in("status", ["active", "pending", "waitlist"]),
+    ctx.barrioId,
+  );
   const activityIds = (enrollments ?? []).map((item) => item.activity_id);
   const { data: activities } = activityIds.length
     ? await ctx.supabase.from("activities").select("*").in("id", activityIds)
     : { data: [] };
-  const { data: fees } = await ctx.supabase
-    .from("fees")
-    .select("*")
-    .eq("student_id", ctx.userId)
-    .in("status", ["pending", "partial", "overdue"])
-    .order("due_date");
+  const { data: fees } = await scopeBarrio(
+    ctx.supabase.from("fees").select("*").eq("student_id", ctx.userId).in("status", ["pending", "partial", "overdue"]).order("due_date"),
+    ctx.barrioId,
+  );
   return (
     <div className="stack">
       <h1 className="display" style={{ fontSize: "2.4rem" }}>
