@@ -15,7 +15,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const supabase = await createClient();
     const { data } = await supabase.from("activities").select("slug, updated_at").eq("status", "active");
+    const seen = new Set<string>();
     for (const activity of data ?? []) {
+      if (seen.has(activity.slug)) continue;
+      seen.add(activity.slug);
       entries.push({
         url: `${origin}/actividades/${activity.slug}`,
         lastModified: activity.updated_at,

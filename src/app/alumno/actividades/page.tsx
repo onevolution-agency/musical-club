@@ -1,13 +1,13 @@
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
-import { requireRole } from "@/modules/auth/session";
+import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { ageGroupCopy, frequencyLabel } from "@/modules/activities/labels";
 import { cancelEnrollment, enrollSelf } from "@/modules/enrollments/actions";
 import { formatARS } from "@/lib/time";
 
 export default async function StudentActivities() {
   const ctx = await requireRole(["student"]);
-  const { data: activities } = await ctx.supabase.from("activities").select("*").eq("status", "active").order("name");
-  const { data: mine } = await ctx.supabase.from("enrollments").select("*").eq("student_id", ctx.userId);
+  const { data: activities } = await scopeBarrio(ctx.supabase.from("activities").select("*").eq("status", "active").order("name"), ctx.barrioId);
+  const { data: mine } = await scopeBarrio(ctx.supabase.from("enrollments").select("*").eq("student_id", ctx.userId), ctx.barrioId);
   return (
     <div className="stack">
       <h1 className="display" style={{ fontSize: "2.2rem" }}>

@@ -38,6 +38,29 @@ describe("dashboard summary", () => {
     ]);
     expect(summary.attendanceByActivity[0]?.rate).toBe(attendanceRate(3, 4));
     expect(summary.cashByAdmin).toEqual([{ adminId: "admin-a", totalCents: 4000, count: 1 }]);
+    expect(summary.revenueByBarrio).toEqual([]);
+  });
+
+  it("sums approved income per barrio and keeps the grand total", () => {
+    const summary = summarizeDashboard({
+      today: "2026-03-10",
+      cashFrom: "2026-03-01",
+      cashTo: "2026-03-31",
+      activities: [{ id: "kids", name: "Grupo Kids" }],
+      enrollments: [],
+      fees: [],
+      payments: [
+        { id: "p1", feeId: "f1", amountCents: 4500000, method: "efectivo", status: "approved", receivedBy: "admin-a", paidOn: "2026-03-05", barrioId: "el-talar" },
+        { id: "p2", feeId: "f2", amountCents: 2400000, method: "mercadopago", status: "approved", receivedBy: null, paidOn: "2026-03-06", barrioId: "nordelta" },
+        { id: "p3", feeId: "f3", amountCents: 100, method: "efectivo", status: "void", receivedBy: "admin-a", paidOn: "2026-03-06", barrioId: "el-talar" },
+      ],
+      attendance: [],
+    });
+    expect(summary.revenueCents).toBe(6900000);
+    expect(summary.revenueByBarrio).toEqual([
+      { barrioId: "el-talar", cents: 4500000 },
+      { barrioId: "nordelta", cents: 2400000 },
+    ]);
   });
 
   it("escapes csv cells", () => {

@@ -1,12 +1,14 @@
+import type { Metadata } from "next";
 import { AppShell } from "@/components/shell/app-shell";
 import { requireRole } from "@/modules/auth/session";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = { title: "Administración" };
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
-  await requireRole(["admin"]);
+  const ctx = await requireRole(["admin"]);
   return (
-    <AppShell role="admin" title="Backoffice">
+    <AppShell ctx={ctx} nav="admin" title="Backoffice">
       {children}
     </AppShell>
   );

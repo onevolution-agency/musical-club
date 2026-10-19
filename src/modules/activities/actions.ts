@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireRole } from "@/modules/auth/session";
+import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { activitySchema, fieldError } from "@/modules/payments/schemas";
 import { slugify } from "./labels";
 import type { ActionResult } from "@/modules/auth/actions";
@@ -28,6 +28,8 @@ export async function saveActivity(formData: FormData): Promise<ActionResult> {
     status: formData.get("status"),
   });
   if (!parsed.success) return { ok: false, error: fieldError(parsed.error) };
+  const barrioId = ctx.barrioId;
+  if (!parsed.data.id && !barrioId) return { ok: false, error: "Elegí un barrio antes de crear la actividad." };
   const weekday = parsed.data.weekday === "" ? null : Number(parsed.data.weekday);
   const payload = {
     name: parsed.data.name,
@@ -44,8 +46,8 @@ export async function saveActivity(formData: FormData): Promise<ActionResult> {
     status: parsed.data.status,
   };
   const query = parsed.data.id
-    ? ctx.supabase.from("activities").update(payload).eq("id", parsed.data.id)
-    : ctx.supabase.from("activities").insert({ ...payload, slug: slugify(parsed.data.name) });
+    ? scopeBarrio(ctx.supabase.from("activities").update(payload).eq("id", parsed.data.id), ctx.barrioId)
+    : ctx.supabase.from("activities").insert({ ...payload, slug: slugify(parsed.data.name), barrio_id: barrioId ?? undefined });
   const { error } = await query;
   if (error) return { ok: false, error: "No pudimos guardar la actividad. Probá con otro nombre." };
   revalidatePath("/admin/actividades");

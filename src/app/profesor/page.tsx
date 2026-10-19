@@ -1,12 +1,15 @@
 import { SubmitButton } from "@/components/ui/forms";
-import { requireRole } from "@/modules/auth/session";
+import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { openSession } from "@/modules/attendance/actions";
 import { ageGroupCopy } from "@/modules/activities/labels";
 import { formatDateTimeAR } from "@/lib/time";
 
 export default async function TeacherHome() {
   const ctx = await requireRole(["teacher", "admin"]);
-  const { data: assignments } = await ctx.supabase.from("activity_teachers").select("activity_id").eq("teacher_id", ctx.userId);
+  const { data: assignments } = await scopeBarrio(
+    ctx.supabase.from("activity_teachers").select("activity_id").eq("teacher_id", ctx.userId),
+    ctx.barrioId,
+  );
   const ids = (assignments ?? []).map((item) => item.activity_id);
   const { data: activities } = ids.length
     ? await ctx.supabase.from("activities").select("*").in("id", ids)

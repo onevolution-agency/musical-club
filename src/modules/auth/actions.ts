@@ -1,9 +1,11 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { isSupabaseConfigured, siteUrl } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
+import { BARRIO_COOKIE } from "@/modules/barrios/domain";
 import { fieldError, profileSchema } from "@/modules/payments/schemas";
 import { getSessionContext, homeFor, safeNext } from "./session";
 
@@ -14,6 +16,7 @@ const credentials = z.object({
   password: z.string().min(8, "La contraseña necesita al menos 8 caracteres."),
   fullName: z.string().trim().min(2).max(120).optional(),
   next: z.string().optional(),
+  barrio: z.string().trim().min(2).max(80).optional(),
 });
 
 export async function signInWithPassword(formData: FormData): Promise<ActionResult> {
@@ -53,17 +56,23 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
     email: formData.get("email"),
     password: formData.get("password"),
     fullName: formData.get("fullName"),
+    barrio: formData.get("barrio")?.toString(),
   });
   if (!parsed.success || !parsed.data.fullName) {
     return { ok: false, error: parsed.success ? "Decinos tu nombre." : fieldError(parsed.error) };
   }
+  if (!parsed.data.barrio) return { ok: false, error: "Elegí tu barrio." };
   const supabase = await createClient();
+  const { data: barrio } = await supabase.from("barrios").select("id, slug, active").eq("slug", parsed.data.barrio).maybeSingle();
+  if (!barrio?.active) return { ok: false, error: "Ese barrio no está abierto." };
+  const jar = await cookies();
+  jar.set(BARRIO_COOKIE, barrio.slug, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax", httpOnly: true });
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
       emailRedirectTo: `${siteUrl()}/auth/callback`,
-      data: { full_name: parsed.data.fullName },
+      data: { full_name: parsed.data.fullName, barrio_slug: barrio.slug },
     },
   });
   if (error) return { ok: false, error: "No pudimos crear la cuenta. Si ya existe, ingresá." };
@@ -102,4 +111,16 @@ export async function updateProfile(formData: FormData): Promise<ActionResult> {
     .eq("id", ctx.userId);
   if (error) return { ok: false, error: "No pudimos guardar el perfil." };
   return { ok: true, message: "Perfil actualizado." };
+}
+
+export async function saveAvatarUrl(url: string): Promise<ActionResult> {
+  const ctx = await getSessionContext();
+  if (!ctx) return { ok: false, error: "Tenés que ingresar." };
+  const trimmed = url.trim();
+  if (trimmed && !trimmed.includes(`/avatars/${ctx.userId}/`)) {
+    return { ok: false, error: "La foto no corresponde a tu usuario." };
+  }
+  const { error } = await ctx.supabase.from("profiles").update({ avatar_url: trimmed || null }).eq("id", ctx.userId);
+  if (error) return { ok: false, error: "No pudimos guardar la foto." };
+  return { ok: true, message: trimmed ? "Foto actualizada." : "Sacamos la foto." };
 }

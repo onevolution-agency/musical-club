@@ -1,5 +1,6 @@
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
-import { requireRole } from "@/modules/auth/session";
+import { requireRole, scopeBarrio } from "@/modules/auth/session";
+import { profilesInBarrio } from "@/modules/barrios/members";
 import { saveActivity, assignTeachers } from "@/modules/activities/actions";
 import { ageGroupCopy, frequencyLabel, weekdays } from "@/modules/activities/labels";
 import { copy } from "@/modules/cms/content";
@@ -7,9 +8,9 @@ import { copy } from "@/modules/cms/content";
 export default async function AdminActivities({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
   const { id } = await searchParams;
   const ctx = await requireRole(["admin"]);
-  const { data: activities } = await ctx.supabase.from("activities").select("*").order("name");
+  const { data: activities } = await scopeBarrio(ctx.supabase.from("activities").select("*").order("name"), ctx.barrioId);
   const current = activities?.find((activity) => activity.id === id);
-  const { data: teachers } = await ctx.supabase.from("profiles").select("id, full_name, email").eq("role", "teacher");
+  const teachers = await profilesInBarrio(ctx, ["teacher"]);
   const { data: assigned } = current
     ? await ctx.supabase.from("activity_teachers").select("teacher_id").eq("activity_id", current.id)
     : { data: [] };

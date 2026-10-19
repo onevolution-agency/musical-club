@@ -4,9 +4,10 @@ import { SiteFooter, SiteHeader } from "@/components/brand/site-chrome";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import { ageGroupCopy, frequencyLabel } from "@/modules/activities/labels";
+import { listPublicBarrios, publicBarrioSlug } from "@/modules/barrios/public";
 import { copy } from "@/modules/cms/content";
 import { formatARS } from "@/lib/time";
-import type { ActivityRow } from "@/lib/supabase/database.types";
+import type { ActivityRow, BarrioRow } from "@/lib/supabase/database.types";
 
 export const metadata: Metadata = {
   title: "Actividades",
@@ -16,19 +17,24 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-async function loadActivities(): Promise<ActivityRow[]> {
-  if (!isSupabaseConfigured()) return [];
+async function loadActivities(): Promise<{ activities: ActivityRow[]; barrios: BarrioRow[]; current: string | null }> {
+  if (!isSupabaseConfigured()) return { activities: [], barrios: [], current: null };
   try {
     const supabase = await createClient();
+    const current = await publicBarrioSlug();
+    const barrios = await listPublicBarrios();
     const { data } = await supabase.from("activities").select("*").eq("status", "active").order("name");
-    return data ?? [];
+    const chosen = current ? barrios.find((barrio) => barrio.slug === current) : null;
+    const activities = ((data ?? []) as ActivityRow[]).filter((activity) => !chosen || activity.barrio_id === chosen.id);
+    return { activities, barrios, current };
   } catch {
-    return [];
+    return { activities: [], barrios: [], current: null };
   }
 }
 
 export default async function ActivitiesPage() {
-  const activities = await loadActivities();
+  const { activities, barrios } = await loadActivities();
+  const barrioName = new Map(barrios.map((barrio) => [barrio.id, barrio.name]));
   return (
     <>
       <SiteHeader />
@@ -61,7 +67,10 @@ export default async function ActivitiesPage() {
             <div className="card-list">
               {activities.map((activity) => (
                 <article key={activity.id} className="panel">
-                  <p className="kicker">{ageGroupCopy[activity.age_group]}</p>
+                  <p className="kicker">
+                    {barrioName.get(activity.barrio_id) ? `${barrioName.get(activity.barrio_id)} · ` : ""}
+                    {ageGroupCopy[activity.age_group]}
+                  </p>
                   <h2 className="display" style={{ fontSize: "2.2rem" }}>
                     <Link href={`/actividades/${activity.slug}`}>{activity.name}</Link>
                   </h2>

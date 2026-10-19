@@ -1,3 +1,4 @@
+import { Avatar } from "@/components/brand/avatar";
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
 import { requireRole } from "@/modules/auth/session";
 import { closeSession, markManual } from "@/modules/attendance/actions";
@@ -17,12 +18,17 @@ export default async function SessionPage({ params }: { params: Promise<{ sessio
     .eq("status", "active");
   const studentIds = (enrollments ?? []).map((row) => row.student_id);
   const { data: profiles } = studentIds.length
-    ? await ctx.supabase.from("profiles").select("id, full_name").in("id", studentIds)
+    ? await ctx.supabase.from("profiles").select("id, full_name, avatar_url").in("id", studentIds)
     : { data: [] };
   const { data: marks } = await ctx.supabase.from("attendance_marks").select("student_id").eq("session_id", sessionId);
   const present = new Set((marks ?? []).map((mark) => mark.student_id));
   const roster = (profiles ?? [])
-    .map((profile) => ({ id: profile.id, name: profile.full_name || "Sin nombre", present: present.has(profile.id) }))
+    .map((profile) => ({
+      id: profile.id,
+      name: profile.full_name || "Sin nombre",
+      avatarUrl: profile.avatar_url,
+      present: present.has(profile.id),
+    }))
     .sort((a, b) => a.name.localeCompare(b.name, "es"));
   return (
     <div className="stack">
@@ -42,7 +48,10 @@ export default async function SessionPage({ params }: { params: Promise<{ sessio
               <ActionForm key={row.id} action={markManual} className="row">
                 <input type="hidden" name="sessionId" value={sessionId} />
                 <input type="hidden" name="studentId" value={row.id} />
-                <span style={{ flex: 1 }}>{row.name}</span>
+                <span className="person" style={{ flex: 1 }}>
+                  <Avatar name={row.name} url={row.avatarUrl} size={44} />
+                  {row.name}
+                </span>
                 <SubmitButton className="btn btn-paper">{row.present ? "Ya está" : "Presente"}</SubmitButton>
               </ActionForm>
             ))}
@@ -56,7 +65,10 @@ export default async function SessionPage({ params }: { params: Promise<{ sessio
         <ul className="stars">
           {roster.map((row) => (
             <li key={row.id}>
-              {row.name} {row.present ? "· presente" : "· ausente"}
+              <span className="person">
+                <Avatar name={row.name} url={row.avatarUrl} size={36} />
+                {row.name} {row.present ? "· presente" : "· ausente"}
+              </span>
             </li>
           ))}
         </ul>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Bars } from "@/components/dashboard/charts";
 import { requireRole } from "@/modules/auth/session";
+import type { BarrioRow } from "@/lib/supabase/database.types";
 import { summarizeDashboard } from "@/modules/dashboard/domain";
 import { formatARS, todayInArgentina } from "@/lib/time";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -12,19 +13,29 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
   const today = todayInArgentina();
   const from = params.desde || `${today.slice(0, 8)}01`;
   const to = params.hasta || today;
-  const [{ data: payments }, { data: fees }, { data: enrollments }, { data: activities }, { data: sessions }, { data: marks }, { data: profiles }] =
+  const [{ data: payments }, { data: fees }, { data: enrollments }, { data: activities }, { data: sessions }, { data: marks }, { data: profiles }, { data: barrios }] =
     await Promise.all([
       db.from("payments").select("*"),
       db.from("fees").select("*"),
-      db.from("enrollments").select("student_id, activity_id, status"),
-      db.from("activities").select("id, name"),
-      db.from("class_sessions").select("id, activity_id, starts_at"),
-      db.from("attendance_marks").select("session_id"),
+      db.from("enrollments").select("student_id, activity_id, status, barrio_id"),
+      db.from("activities").select("id, name, barrio_id"),
+      db.from("class_sessions").select("id, activity_id, starts_at, barrio_id"),
+      db.from("attendance_marks").select("session_id, barrio_id"),
       db.from("profiles").select("id, full_name, role"),
+      db.from("barrios").select("id, name"),
     ]);
+  const inBarrio = <T extends { barrio_id?: string | null }>(rows: T[] | null) =>
+    (rows ?? []).filter((row) => !ctx.barrioId || row.barrio_id === ctx.barrioId);
+  const paymentRows = inBarrio(payments);
+  const feeRows = inBarrio(fees);
+  const enrollmentRows = inBarrio(enrollments);
+  const activityRows = inBarrio(activities);
+  const sessionRows = inBarrio(sessions);
+  const markRows = inBarrio(marks);
+  const barrioNames = new Map(((barrios ?? []) as Pick<BarrioRow, "id" | "name">[]).map((barrio) => [barrio.id, barrio.name]));
   const names = new Map((profiles ?? []).map((profile) => [profile.id, profile.full_name || "Admin"]));
-  const attendance = (activities ?? []).map((activity) => {
-    const activitySessions = (sessions ?? []).filter((session) => {
+  const attendance = activityRows.map((activity) => {
+    const activitySessions = sessionRows.filter((session) => {
       const day = session.starts_at.slice(0, 10);
       return session.activity_id === activity.id && day >= from && day <= to;
     });
@@ -32,12 +43,12 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
     return {
       activityId: activity.id,
       sessions: activitySessions.length,
-      marks: (marks ?? []).filter((mark) => sessionIds.has(mark.session_id)).length,
-      enrolled: (enrollments ?? []).filter((row) => row.activity_id === activity.id && row.status === "active").length,
+      marks: markRows.filter((mark) => sessionIds.has(mark.session_id)).length,
+      enrolled: enrollmentRows.filter((row) => row.activity_id === activity.id && row.status === "active").length,
     };
   });
   const summary = summarizeDashboard({
-    payments: (payments ?? []).map((payment) => ({
+    payments: paymentRows.map((payment) => ({
       id: payment.id,
       feeId: payment.fee_id,
       amountCents: payment.amount_cents,
@@ -45,8 +56,9 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
       status: payment.status,
       receivedBy: payment.received_by,
       paidOn: (payment.paid_at ?? payment.created_at).slice(0, 10),
+      barrioId: payment.barrio_id,
     })),
-    fees: (fees ?? []).map((fee) => ({
+    fees: feeRows.map((fee) => ({
       id: fee.id,
       amountCents: fee.amount_cents,
       dueDate: fee.due_date,
@@ -54,12 +66,12 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
       activityId: fee.activity_id,
       studentId: fee.student_id,
     })),
-    enrollments: (enrollments ?? []).map((row) => ({
+    enrollments: enrollmentRows.map((row) => ({
       studentId: row.student_id,
       activityId: row.activity_id,
       status: row.status,
     })),
-    activities: activities ?? [],
+    activities: activityRows,
     attendance,
     today,
     cashFrom: from,
@@ -113,6 +125,10 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
           { name: "Mercado Pago", value: summary.revenueByMethod.mercadopago / 100 },
           { name: "Efectivo", value: summary.revenueByMethod.efectivo / 100 },
         ]}
+      />
+      <Bars
+        label="Ingresos por barrio"
+        data={summary.revenueByBarrio.map((row) => ({ name: barrioNames.get(row.barrioId) ?? row.barrioId, value: row.cents / 100 }))}
       />
       <Bars
         label="Inscripciones por actividad"

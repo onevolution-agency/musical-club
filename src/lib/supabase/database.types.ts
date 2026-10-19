@@ -1,4 +1,5 @@
-export type Role = "student" | "teacher" | "admin";
+export type Role = "student" | "teacher" | "admin" | "super_admin";
+export type MembershipRole = "student" | "teacher" | "admin";
 export type AgeGroup = "kids" | "youth_adults";
 export type BillingFrequency = "monthly" | "biweekly";
 export type ActivityStatus = "draft" | "active" | "archived";
@@ -19,12 +20,33 @@ export type ProfileRow = {
   birth_date: string | null;
   emergency_contact: string | null;
   avatar_url: string | null;
+  current_barrio_id: string | null;
   created_at: string;
   updated_at: string;
 };
 
+export type BarrioRow = {
+  id: string;
+  slug: string;
+  name: string;
+  logo_url: string | null;
+  active: boolean;
+  default_price_cents: number;
+  default_billing_frequency: BillingFrequency;
+  created_at: string;
+  updated_at: string;
+};
+
+export type MembershipRow = {
+  user_id: string;
+  barrio_id: string;
+  role: MembershipRole;
+  created_at: string;
+};
+
 export type ActivityRow = {
   id: string;
+  barrio_id: string;
   slug: string;
   name: string;
   description: string;
@@ -45,6 +67,7 @@ export type ActivityRow = {
 
 export type EnrollmentRow = {
   id: string;
+  barrio_id: string;
   activity_id: string;
   student_id: string;
   status: EnrollmentStatus;
@@ -56,6 +79,7 @@ export type EnrollmentRow = {
 
 export type ClassSessionRow = {
   id: string;
+  barrio_id: string;
   activity_id: string;
   opened_by: string;
   starts_at: string;
@@ -67,6 +91,7 @@ export type ClassSessionRow = {
 
 export type AttendanceRow = {
   id: string;
+  barrio_id: string;
   session_id: string;
   student_id: string;
   enrollment_id: string | null;
@@ -77,6 +102,7 @@ export type AttendanceRow = {
 
 export type FeeRow = {
   id: string;
+  barrio_id: string;
   enrollment_id: string;
   student_id: string;
   activity_id: string;
@@ -93,6 +119,7 @@ export type FeeRow = {
 
 export type PaymentRow = {
   id: string;
+  barrio_id: string;
   fee_id: string;
   student_id: string;
   amount_cents: number;
@@ -130,6 +157,7 @@ export type InquiryRow = {
   email: string;
   phone: string | null;
   community: string | null;
+  barrio_id: string | null;
   message: string;
   created_at: string;
 };
@@ -138,6 +166,7 @@ export type InviteRow = {
   id: string;
   email: string;
   role: "teacher" | "admin";
+  barrio_id: string | null;
   full_name: string | null;
   token: string;
   invited_by: string | null;
@@ -148,6 +177,7 @@ export type InviteRow = {
 
 export type ActivityTeacherRow = {
   activity_id: string;
+  barrio_id: string;
   teacher_id: string;
   assigned_at: string;
 };
@@ -163,6 +193,8 @@ export type Database = {
   public: {
     Tables: {
       profiles: Table<ProfileRow>;
+      barrios: Table<BarrioRow>;
+      barrio_memberships: Table<MembershipRow>;
       activities: Table<ActivityRow>;
       activity_teachers: Table<ActivityTeacherRow>;
       enrollments: Table<EnrollmentRow>;

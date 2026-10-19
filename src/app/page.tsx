@@ -18,10 +18,10 @@ export default function HomePage() {
           </h1>
           <figure className="torn hero-photo">
             <Image
-              src="/media/hero.jpg"
-              alt="Elenco de comedia musical en escena, con vestuario de los años 60"
-              width={1544}
-              height={850}
+              src="/media/hero.webp"
+              alt="Collage ilustrado del taller: alto contraste en blanco y negro, trazo rojo y papel rasgado"
+              width={1280}
+              height={720}
               priority
               sizes="(min-width: 900px) 920px, 100vw"
             />
@@ -62,19 +62,19 @@ export default function HomePage() {
           <div className="wrap photo-row">
             <figure className="torn">
               <Image
-                src="/media/photo-family.jpg"
-                alt="Familias cantando juntas en un número de comedia musical"
-                width={998}
-                height={604}
+                src="/media/photo-family.webp"
+                alt="Ilustración de una familia cantando, con trazo de marcador y estrella roja"
+                width={1100}
+                height={825}
                 sizes="(min-width: 800px) 50vw, 100vw"
               />
             </figure>
             <figure className="torn">
               <Image
-                src="/media/photo-dance.jpg"
-                alt="Parejas bailando en un salón con vestuario retro"
-                width={722}
-                height={606}
+                src="/media/photo-dance.webp"
+                alt="Ilustración de una pareja bailando, alto contraste y contorno dibujado a mano"
+                width={675}
+                height={900}
                 sizes="(min-width: 800px) 40vw, 100vw"
               />
             </figure>
@@ -110,10 +110,10 @@ export default function HomePage() {
             <p className="kicker">{copy.opsIntro}</p>
             <figure className="torn" style={{ margin: "1rem 0" }}>
               <Image
-                src="/media/photo-stage.jpg"
-                alt="Elenco completo en el escenario bajo una lluvia de confeti"
-                width={1536}
-                height={642}
+                src="/media/photo-stage.webp"
+                alt="Ilustración del elenco en el escenario, collage de afiche con papel rasgado"
+                width={1280}
+                height={720}
                 sizes="100vw"
               />
             </figure>

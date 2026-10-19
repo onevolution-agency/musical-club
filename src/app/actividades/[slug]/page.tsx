@@ -9,16 +9,27 @@ import { ageGroupCopy, frequencyLabel, weekdays } from "@/modules/activities/lab
 import { copy } from "@/modules/cms/content";
 import { JsonLd } from "@/modules/cms/jsonld";
 import { enrollSelf } from "@/modules/enrollments/actions";
+import { listPublicBarrios, publicBarrioSlug } from "@/modules/barrios/public";
 import { getSessionContext } from "@/modules/auth/session";
+import type { ActivityRow } from "@/lib/supabase/database.types";
 import { formatARS } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 
-async function load(slug: string) {
+async function load(slug: string): Promise<ActivityRow | null> {
   if (!isSupabaseConfigured()) return null;
   const supabase = await createClient();
-  const { data } = await supabase.from("activities").select("*").eq("slug", slug).maybeSingle();
-  return data;
+  const { data } = await supabase.from("activities").select("*").eq("slug", slug).eq("status", "active");
+  const rows = (data ?? []) as ActivityRow[];
+  if (rows.length === 0) return null;
+  const current = await publicBarrioSlug();
+  if (current) {
+    const barrios = await listPublicBarrios();
+    const chosen = barrios.find((barrio) => barrio.slug === current);
+    const match = chosen ? rows.find((row) => row.barrio_id === chosen.id) : null;
+    if (match) return match;
+  }
+  return rows[0] ?? null;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {

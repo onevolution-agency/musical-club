@@ -1,3 +1,3 @@
 export default function Loading() {
-  return <p className="hint">Cargando…</p>;
+  return <p className="state-loading">Cargando tu espacio…</p>;
 }

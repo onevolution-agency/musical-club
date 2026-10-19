@@ -14,7 +14,7 @@ export function attendanceRate(marks: number, expected: number): number {
 }
 
 export type DashboardFee = FeeSnapshot & { activityId: string; studentId: string };
-export type DashboardPayment = PaymentSnapshot & { paidOn: string };
+export type DashboardPayment = PaymentSnapshot & { paidOn: string; barrioId?: string | null };
 
 export type DashboardSummary = {
   revenueCents: number;
@@ -27,6 +27,7 @@ export type DashboardSummary = {
   enrollmentsByActivity: { activityId: string; name: string; count: number }[];
   attendanceByActivity: { activityId: string; name: string; rate: number; marks: number; expected: number }[];
   cashByAdmin: { adminId: string; totalCents: number; count: number }[];
+  revenueByBarrio: { barrioId: string; cents: number }[];
 };
 
 export function summarizeDashboard(input: {
@@ -98,7 +99,19 @@ export function summarizeDashboard(input: {
       };
     }),
     cashByAdmin: reconcileCash(input.payments, input.cashFrom, input.cashTo),
+    revenueByBarrio: revenueByBarrio(input.payments),
   };
+}
+
+export function revenueByBarrio(payments: DashboardPayment[]): { barrioId: string; cents: number }[] {
+  const totals = new Map<string, number>();
+  for (const payment of payments) {
+    if (payment.status !== "approved" || !payment.barrioId) continue;
+    totals.set(payment.barrioId, (totals.get(payment.barrioId) ?? 0) + payment.amountCents);
+  }
+  return [...totals.entries()]
+    .map(([barrioId, cents]) => ({ barrioId, cents }))
+    .sort((a, b) => b.cents - a.cents);
 }
 
 export function toCsv(headers: string[], rows: string[][]): string {

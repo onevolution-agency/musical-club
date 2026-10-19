@@ -1,5 +1,5 @@
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
-import { requireRole } from "@/modules/auth/session";
+import { requireRole, scopeBarrio } from "@/modules/auth/session";
 import { feeStatusLabel, frequencyLabel } from "@/modules/activities/labels";
 import { generateFees, registerCash } from "@/modules/payments/actions";
 import { remainingCents, type PaymentSnapshot } from "@/modules/payments/domain";
@@ -10,13 +10,13 @@ export default async function AdminFees({ searchParams }: { searchParams: Promis
   const filters = await searchParams;
   const ctx = await requireRole(["admin"]);
   const statuses: FeeStatus[] = ["pending", "partial", "paid", "overdue", "void"];
-  let query = ctx.supabase.from("fees").select("*").order("due_date", { ascending: false }).limit(200);
+  let query = scopeBarrio(ctx.supabase.from("fees").select("*").order("due_date", { ascending: false }).limit(200), ctx.barrioId);
   if (filters.estado && statuses.includes(filters.estado as FeeStatus)) {
     query = query.eq("status", filters.estado as FeeStatus);
   }
   if (filters.actividad) query = query.eq("activity_id", filters.actividad);
   const { data: fees } = await query;
-  const { data: activities } = await ctx.supabase.from("activities").select("id, name, price_cents, billing_frequency");
+  const { data: activities } = await scopeBarrio(ctx.supabase.from("activities").select("id, name, price_cents, billing_frequency"), ctx.barrioId);
   const { data: students } = await ctx.supabase.from("profiles").select("id, full_name");
   const ids = (fees ?? []).map((fee) => fee.id);
   const { data: payments } = ids.length ? await ctx.supabase.from("payments").select("*").in("fee_id", ids) : { data: [] };
