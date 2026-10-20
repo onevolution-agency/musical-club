@@ -29,7 +29,7 @@ export async function saveActivity(formData: FormData): Promise<ActionResult> {
   });
   if (!parsed.success) return { ok: false, error: fieldError(parsed.error) };
   const barrioId = ctx.barrioId;
-  if (!parsed.data.id && !barrioId) return { ok: false, error: "Elegí un barrio antes de crear la actividad." };
+  if (!parsed.data.id && !barrioId) return { ok: false, error: "Falta el barrio." };
   const weekday = parsed.data.weekday === "" ? null : Number(parsed.data.weekday);
   const payload = {
     name: parsed.data.name,
@@ -49,7 +49,7 @@ export async function saveActivity(formData: FormData): Promise<ActionResult> {
     ? scopeBarrio(ctx.supabase.from("activities").update(payload).eq("id", parsed.data.id), ctx.barrioId)
     : ctx.supabase.from("activities").insert({ ...payload, slug: slugify(parsed.data.name), barrio_id: barrioId ?? undefined });
   const { error } = await query;
-  if (error) return { ok: false, error: "No pudimos guardar la actividad. Probá con otro nombre." };
+  if (error) return { ok: false, error: "No pudimos guardar la actividad." };
   revalidatePath("/admin/actividades");
   revalidatePath("/actividades");
   return { ok: true, message: "Actividad guardada." };

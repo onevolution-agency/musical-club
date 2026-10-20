@@ -44,14 +44,14 @@ export function attendanceMessage(code: AttendanceReject, name?: string): string
   const who = name ? name : "Este alumno";
   switch (code) {
     case "duplicate":
-      return `${who} ya estaba presente. No se duplicó la asistencia.`;
+      return `${who} ya estaba presente.`;
     case "closed":
       return "Esta clase ya está cerrada.";
     case "not_enrolled":
-      return `${who} no tiene una inscripción activa en esta actividad.`;
+      return `${who} no está inscripto.`;
     case "wrong_activity":
-      return "El QR corresponde a otra actividad.";
+      return "QR de otra clase.";
     default:
-      return "No pudimos leer ese QR. Probá de nuevo o marcalo a mano.";
+      return "No pudimos leer el QR.";
   }
 }

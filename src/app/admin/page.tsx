@@ -145,7 +145,7 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
         <h2 className="display" style={{ fontSize: "1.5rem" }}>
           Efectivo por admin
         </h2>
-        {summary.cashByAdmin.length === 0 ? <p className="empty">No hay efectivo en este período.</p> : null}
+        {summary.cashByAdmin.length === 0 ? <p className="empty">No hay efectivo.</p> : null}
         <ul className="stars">
           {summary.cashByAdmin.map((row) => (
             <li key={row.adminId}>

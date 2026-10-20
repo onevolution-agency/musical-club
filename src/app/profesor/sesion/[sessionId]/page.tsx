@@ -50,7 +50,7 @@ export default async function SessionPage({ params }: { params: Promise<{ sessio
             <h2 className="display" style={{ fontSize: "1.5rem" }}>
               Marca manual
             </h2>
-            {roster.length === 0 ? <p className="empty">No hay alumnos activos en este grupo.</p> : null}
+            {roster.length === 0 ? <p className="empty">No hay alumnos.</p> : null}
             {roster.map((row) => (
               <ActionForm key={row.id} action={markManual} className="row">
                 <input type="hidden" name="sessionId" value={sessionId} />

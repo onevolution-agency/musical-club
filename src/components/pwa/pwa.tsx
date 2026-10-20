@@ -1,11 +1,29 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { isHandheldInstallTarget } from "./install-target";
 
 type BeforeInstall = Event & { prompt: () => Promise<void> };
 
-function subscribe() {
-  return () => undefined;
+function subscribe(onStoreChange: () => void) {
+  const queries = [
+    window.matchMedia("(hover: hover) and (pointer: fine)"),
+    window.matchMedia("(pointer: coarse)"),
+    window.matchMedia("(max-width: 900px)"),
+  ];
+  for (const query of queries) query.addEventListener("change", onStoreChange);
+  return () => {
+    for (const query of queries) query.removeEventListener("change", onStoreChange);
+  };
+}
+
+function handheldNow() {
+  return isHandheldInstallTarget({
+    userAgent: window.navigator.userAgent,
+    finePointer: window.matchMedia("(hover: hover) and (pointer: fine)").matches,
+    coarsePointer: window.matchMedia("(pointer: coarse)").matches,
+    narrow: window.matchMedia("(max-width: 900px)").matches,
+  });
 }
 
 function iosInstallHint() {
@@ -17,8 +35,9 @@ function iosInstallHint() {
 export function Pwa() {
   const [install, setInstall] = useState<BeforeInstall | null>(null);
   const [hidden, setHidden] = useState(false);
+  const handheld = useSyncExternalStore(subscribe, handheldNow, () => false);
   const iosHint = useSyncExternalStore(subscribe, iosInstallHint, () => false);
-  const visible = !hidden && Boolean(install || iosHint);
+  const visible = !hidden && handheld && Boolean(install || iosHint);
 
   useEffect(() => {
     if (process.env.NODE_ENV === "production" && "serviceWorker" in navigator) {
@@ -40,25 +59,20 @@ export function Pwa() {
 
   if (!visible) return null;
   return (
-    <div className="install-banner" role="dialog" aria-label="Instalar Musical Club">
+    <div className="install-banner" role="dialog" aria-label="Instalar la app">
       <div className="install-banner-inner">
-        <p>
-          {iosHint
-            ? "En el iPhone: Compartir y después Agregar a inicio."
-            : "Instalá Musical Club en el teléfono para la lista y tu QR."}
-        </p>
+        <p>Instalá la app</p>
         <span className="row">
-          {install ? (
-            <button
-              className="btn btn-red"
-              onClick={() => {
-                void install.prompt();
-                setHidden(true);
-              }}
-            >
-              Instalar
-            </button>
-          ) : null}
+          <button
+            className="btn btn-red"
+            onClick={() => {
+              if (!install) return;
+              void install.prompt();
+              setHidden(true);
+            }}
+          >
+            Instalar
+          </button>
           <button className="btn btn-ghost install-dismiss" onClick={() => setHidden(true)}>
             Ahora no
           </button>

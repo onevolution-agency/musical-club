@@ -21,7 +21,6 @@ export default async function BarriosPage({ searchParams }: { searchParams: Prom
       <h1 className="display" style={{ fontSize: "2.2rem" }}>
         Barrios
       </h1>
-      <p className="hint">El arancel y la frecuencia de acá son el valor de referencia del barrio. Cada actividad puede tener el suyo.</p>
       <ActionForm action={saveBarrio} className="panel">
         {current && !canCreate ? <input type="hidden" name="id" value={current.id} /> : null}
         {current && canCreate && id ? <input type="hidden" name="id" value={current.id} /> : null}
@@ -30,11 +29,11 @@ export default async function BarriosPage({ searchParams }: { searchParams: Prom
           <input name="name" required defaultValue={id || !canCreate ? current?.name ?? "" : ""} />
         </label>
         <label className="field">
-          <span>Slug</span>
-          <input name="slug" defaultValue={id || !canCreate ? current?.slug ?? "" : ""} placeholder="club-nordelta" />
+          <span>Enlace</span>
+          <input name="slug" defaultValue={id || !canCreate ? current?.slug ?? "" : ""} />
         </label>
         <label className="field">
-          <span>Logo (URL)</span>
+          <span>Logo</span>
           <input name="logoUrl" defaultValue={id || !canCreate ? current?.logo_url ?? "" : ""} />
         </label>
         <label className="field">
@@ -54,7 +53,7 @@ export default async function BarriosPage({ searchParams }: { searchParams: Prom
         </label>
         <SubmitButton>{id || !canCreate ? "Guardar barrio" : "Crear barrio"}</SubmitButton>
       </ActionForm>
-      {(barrios ?? []).length === 0 ? <p className="empty">Todavía no hay barrios.</p> : null}
+      {(barrios ?? []).length === 0 ? <p className="empty">No hay barrios.</p> : null}
       <div className="table-wrap">
         <table>
           <thead>
@@ -73,7 +72,6 @@ export default async function BarriosPage({ searchParams }: { searchParams: Prom
                     <BarrioLogo url={barrio.logo_url} />
                     <span>
                       <a href={`/admin/barrios?id=${barrio.id}`}>{barrio.name}</a>
-                      <div className="hint">{barrio.slug}</div>
                     </span>
                   </span>
                 </td>

@@ -188,7 +188,7 @@ export function remainingCents(fee: FeeSnapshot, payments: PaymentSnapshot[]): n
 
 export function assertCanRegisterCash(role: Role): void {
   if (role !== "admin" && role !== "super_admin") {
-    throw new DomainError("forbidden", "Solo un admin puede registrar un pago en efectivo.");
+    throw new DomainError("forbidden", "No podés registrar efectivo.");
   }
 }
 
@@ -254,7 +254,7 @@ export function voidPayment(
   today: string,
 ): Ledger {
   if (actor.role !== "admin" && actor.role !== "super_admin") {
-    throw new DomainError("forbidden", "Solo un admin puede anular un pago.");
+    throw new DomainError("forbidden", "No podés anular el pago.");
   }
   const payment = ledger.payments.find((item) => item.id === paymentId);
   if (!payment) throw new DomainError("not_found", "No encontramos ese pago.");

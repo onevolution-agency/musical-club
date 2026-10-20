@@ -80,7 +80,7 @@ export default async function EnrollmentsPage({ searchParams }: { searchParams: 
         </label>
         <SubmitButton>Inscribir</SubmitButton>
       </ActionForm>
-      {(enrollments ?? []).length === 0 ? <p className="empty">No hay inscripciones con ese filtro.</p> : null}
+      {(enrollments ?? []).length === 0 ? <p className="empty">No hay inscripciones.</p> : null}
       <div className="table-wrap">
         <table>
           <thead>

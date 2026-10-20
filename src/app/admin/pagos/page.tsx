@@ -75,7 +75,7 @@ export default async function PaymentsPage({
         <h2 className="display" style={{ fontSize: "1.4rem" }}>
           Conciliación de efectivo
         </h2>
-        {cash.length === 0 ? <p className="empty">Nadie registró efectivo en este período.</p> : null}
+        {cash.length === 0 ? <p className="empty">No hay efectivo.</p> : null}
         <ul className="stars">
           {cash.map((row) => (
             <li key={row.adminId}>
@@ -84,7 +84,7 @@ export default async function PaymentsPage({
           ))}
         </ul>
       </section>
-      {inRange.length === 0 ? <p className="empty">No hay pagos con ese filtro.</p> : null}
+      {inRange.length === 0 ? <p className="empty">No hay pagos.</p> : null}
       {inRange.map((payment) => (
         <article key={payment.id} className="panel">
           <p>
@@ -100,7 +100,7 @@ export default async function PaymentsPage({
           {payment.status === "approved" ? (
             <ActionForm action={voidCashPayment} className="row">
               <input type="hidden" name="paymentId" value={payment.id} />
-              <input name="reason" required minLength={3} placeholder="Motivo de la anulación" aria-label="Motivo de la anulación" />
+              <input name="reason" required minLength={3} placeholder="Motivo" aria-label="Motivo" />
               <SubmitButton className="btn btn-ghost">Anular</SubmitButton>
             </ActionForm>
           ) : null}

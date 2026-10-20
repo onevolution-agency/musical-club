@@ -58,7 +58,7 @@ export async function saveBarrio(formData: FormData): Promise<ActionResult> {
   if (!Number.isFinite(pricePesos) || pricePesos < 0) return { ok: false, error: "El arancel no puede ser negativo." };
   if (frequency !== "monthly" && frequency !== "biweekly") return { ok: false, error: "Frecuencia inválida." };
   const slug = slugifyBarrio(slugInput || name);
-  if (!slug) return { ok: false, error: "El slug quedó vacío." };
+  if (!slug) return { ok: false, error: "Falta el nombre." };
   const payload = {
     name,
     slug,
@@ -68,13 +68,13 @@ export async function saveBarrio(formData: FormData): Promise<ActionResult> {
     default_billing_frequency: frequency as "monthly" | "biweekly",
   };
   if (!id && ctx.profile.role !== "super_admin") {
-    return { ok: false, error: "Solo Santiago o Gaby pueden crear un barrio." };
+    return { ok: false, error: "No podés crear barrios." };
   }
   const query = id
     ? ctx.supabase.from("barrios").update(payload).eq("id", id)
     : ctx.supabase.from("barrios").insert(payload);
   const { error } = await query;
-  if (error) return { ok: false, error: "No pudimos guardar el barrio. Probá con otro nombre." };
+  if (error) return { ok: false, error: "No pudimos guardar el barrio." };
   revalidatePath("/admin/barrios");
   revalidatePath("/");
   return { ok: true, message: "Barrio guardado." };

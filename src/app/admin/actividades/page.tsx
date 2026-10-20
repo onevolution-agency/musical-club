@@ -47,7 +47,7 @@ export default async function AdminActivities({ searchParams }: { searchParams: 
         <label className="field">
           <span>Día</span>
           <select name="weekday" defaultValue={current?.weekday ?? ""}>
-            <option value="">A elección de la administración</option>
+            <option value="">Sin día</option>
             {weekdays.map((day, index) => (
               <option key={day} value={index}>
                 {day}
@@ -100,7 +100,7 @@ export default async function AdminActivities({ searchParams }: { searchParams: 
             Profes de {current.name}
           </h2>
           <input type="hidden" name="activityId" value={current.id} />
-          {(teachers ?? []).length === 0 ? <p>Invitá un profe primero.</p> : null}
+          {(teachers ?? []).length === 0 ? <p>No hay profes.</p> : null}
           {(teachers ?? []).map((teacher) => (
             <label key={teacher.id} className="row">
               <input type="checkbox" name="teacherId" value={teacher.id} defaultChecked={selected.has(teacher.id)} />

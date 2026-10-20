@@ -10,7 +10,7 @@ export const cashPaymentSchema = z.object({
 
 export const voidPaymentSchema = z.object({
   paymentId: z.uuid(),
-  reason: z.string().trim().min(3, "Indicá el motivo de la anulación.").max(300),
+  reason: z.string().trim().min(3, "Falta el motivo.").max(300),
 });
 
 export const preferenceSchema = z.object({
