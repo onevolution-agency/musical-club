@@ -14,6 +14,7 @@ export function organizationGraph(origin: string) {
         "@id": orgId,
         name: "Musical Club",
         url: origin,
+        logo: `${origin}/brand/logo.png`,
         description: copy.experience,
         inLanguage: "es-AR",
         areaServed: { "@type": "Country", name: "Argentina" },

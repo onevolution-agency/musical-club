@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Oswald, Source_Sans_3 } from "next/font/google";
 import { Pwa } from "@/components/pwa/pwa";
 import { copy } from "@/modules/cms/content";
-import { siteUrl } from "@/lib/env";
 import "./globals.css";
 
 const oswald = Oswald({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-oswald", display: "swap" });
@@ -13,10 +12,10 @@ const sourceSans = Source_Sans_3({
   display: "swap",
 });
 
-const origin = siteUrl();
+const CANONICAL_ORIGIN = "https://musicalclub.com.ar";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(origin),
+  metadataBase: new URL(CANONICAL_ORIGIN),
   title: { default: "Musical Club", template: "%s · Musical Club" },
   description: copy.experience,
   applicationName: "Musical Club",
@@ -26,12 +25,25 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_AR",
-    url: "/",
+    url: CANONICAL_ORIGIN,
     siteName: "Musical Club",
     title: "Musical Club",
     description: copy.experience,
+    images: [
+      {
+        url: `${CANONICAL_ORIGIN}/og.jpg`,
+        width: 1200,
+        height: 630,
+        alt: "Musical Club. Talleres de teatro musical",
+      },
+    ],
   },
-  twitter: { card: "summary_large_image", title: "Musical Club", description: copy.experience },
+  twitter: {
+    card: "summary_large_image",
+    title: "Musical Club",
+    description: copy.experience,
+    images: [`${CANONICAL_ORIGIN}/og.jpg`],
+  },
   robots: { index: true, follow: true },
   appleWebApp: { capable: true, title: "Musical Club", statusBarStyle: "black-translucent" },
   formatDetection: { telephone: false },

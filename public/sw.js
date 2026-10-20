@@ -1,5 +1,5 @@
-const CACHE = "musical-club-v1";
-const PRECACHE = ["/offline.html", "/icons/icon-192.png", "/icons/icon-512.png"];
+const CACHE = "musical-club-v2";
+const PRECACHE = ["/offline.html", "/brand/logo.png", "/icons/icon-192.png", "/icons/icon-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)));
