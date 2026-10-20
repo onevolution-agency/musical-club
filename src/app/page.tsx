@@ -1,6 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
 import { SiteFooter, SiteHeader } from "@/components/brand/site-chrome";
-import { BrushStar, Scribble } from "@/components/brand/marks";
 import { copy } from "@/modules/cms/content";
 import { JsonLd, organizationGraph } from "@/modules/cms/jsonld";
 import { siteUrl } from "@/lib/env";
@@ -12,23 +12,19 @@ export default function HomePage() {
       <SiteHeader />
       <main id="contenido">
         <section className="hero wrap">
-          <div className="hero-mark" aria-hidden="true">
-            <BrushStar />
+          <div className="hero-mark">
+            <Image src="/brand/star.png" alt="" width={692} height={613} priority />
           </div>
           <h1 className="display">
             {copy.heroTitle}
             <span className="banner">{copy.heroBanner}</span>
           </h1>
-          <Scribble className="scribble" />
           <p className="byline">{copy.byline}</p>
         </section>
 
         <section className="section" id="experiencia">
-          <div className="wrap sheet-wrap">
-            <span className="tape tape-tr" aria-hidden="true" />
-            <div className="panel sheet">
-              <h2 className="display statement boxed">{copy.experience}</h2>
-            </div>
+          <div className="wrap">
+            <h2 className="display statement boxed">{copy.experience}</h2>
           </div>
         </section>
 
@@ -55,21 +51,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="section tight" aria-hidden="true">
-          <div className="wrap sticker-row">
-            <span className="sticker sticker-ink">
-              <BrushStar />
-            </span>
-            <span className="tape tape-inline" />
-            <span className="sticker sticker-red">
-              <BrushStar />
-            </span>
-            <span className="sticker sticker-paper">
-              <BrushStar />
-            </span>
-          </div>
-        </section>
-
         <section className="section">
           <div className="wrap grid-2">
             <article className="panel">
@@ -82,7 +63,6 @@ export default function HomePage() {
               </ul>
             </article>
             <article className="red-panel cta-block" id="integrar">
-              <span className="tape tape-tl" aria-hidden="true" />
               <h2 className="display">{copy.ctaTitle}</h2>
               {copy.ctaBody.map((item) => (
                 <p key={item}>{item}</p>
@@ -96,7 +76,6 @@ export default function HomePage() {
 
         <section className="section" id="logistica">
           <div className="wrap">
-            <div className="torn-edge" aria-hidden="true" />
             <h2 className="display statement">{copy.opsTitle}</h2>
             <p className="kicker">{copy.opsIntro}</p>
             <div className="ops-grid">

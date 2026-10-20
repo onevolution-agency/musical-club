@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Avatar } from "@/components/brand/avatar";
 import { BarrioSwitcher } from "@/components/brand/barrio-switcher";
 import { Logo } from "@/components/brand/logo";
-import { BrushStar } from "@/components/brand/marks";
 import { signOut } from "@/modules/auth/actions";
 import type { SessionContext } from "@/modules/auth/session";
 import type { Role } from "@/lib/supabase/database.types";
@@ -66,7 +65,6 @@ export function AppShell({
             </Link>
           ))}
         </nav>
-        <BrushStar className="side-mark" />
       </aside>
       <div className="app-main">
         <header className="app-top">
