@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { BarrioSwitcher, type BarrioOption } from "./barrio-switcher";
-import { BrushStar } from "./marks";
 import { Logo } from "./logo";
 import { copy } from "@/modules/cms/content";
 import { listPublicBarrios, publicBarrioSlug } from "@/modules/barrios/public";
@@ -48,7 +47,7 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="wrap">
-        <BrushStar className="footer-star" />
+        <Logo size="lg" />
         <p className="display statement">{copy.closing}</p>
         <p className="credits">{copy.credits}</p>
         <p className="row">

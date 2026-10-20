@@ -1,23 +1,26 @@
-import { brushStarPath } from "./star-path";
+import Image from "next/image";
 
-export function Logo({ size = "md", href = "/" }: { size?: "sm" | "md"; href?: string }) {
+const WORDMARK = { src: "/brand/logo.png", width: 1826, height: 811 } as const;
+
+const frame = {
+  sm: { sizes: "140px" },
+  md: { sizes: "180px" },
+  lg: { sizes: "280px" },
+} as const;
+
+export function Logo({ size = "md", href = "/" }: { size?: keyof typeof frame; href?: string }) {
+  const box = frame[size];
   return (
     <a className={`logo logo-${size}`} href={href} aria-label="Musical Club">
-      <span className="logo-word">
-        <span>musical</span>
-        <span>club</span>
-      </span>
-      <svg className="logo-star" viewBox="0 0 100 100" aria-hidden="true">
-        <path fill="currentColor" d={brushStarPath} />
-      </svg>
+      <Image
+        src={WORDMARK.src}
+        alt=""
+        width={WORDMARK.width}
+        height={WORDMARK.height}
+        priority={size === "md"}
+        sizes={box.sizes}
+        style={{ width: "100%", height: "auto" }}
+      />
     </a>
-  );
-}
-
-export function StarRow() {
-  return (
-    <p className="mark-stars" aria-hidden="true">
-      ★ ★ ★
-    </p>
   );
 }
