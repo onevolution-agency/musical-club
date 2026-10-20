@@ -31,10 +31,10 @@ export const metadata: Metadata = {
     description: copy.experience,
     images: [
       {
-        url: `${CANONICAL_ORIGIN}/og.jpg`,
+        url: `${CANONICAL_ORIGIN}/og-v2.jpg`,
         width: 1200,
         height: 630,
-        alt: "Musical Club. Talleres de teatro musical",
+        alt: "Musical Club",
       },
     ],
   },
@@ -42,7 +42,14 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Musical Club",
     description: copy.experience,
-    images: [`${CANONICAL_ORIGIN}/og.jpg`],
+    images: [
+      {
+        url: `${CANONICAL_ORIGIN}/og-v2.jpg`,
+        width: 1200,
+        height: 630,
+        alt: "Musical Club",
+      },
+    ],
   },
   robots: { index: true, follow: true },
   appleWebApp: { capable: true, title: "Musical Club", statusBarStyle: "black-translucent" },
