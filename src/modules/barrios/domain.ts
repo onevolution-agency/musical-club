@@ -24,6 +24,11 @@ export function homeForRole(role: Role): string {
   return "/alumno";
 }
 
+function barrioFromProfile(currentBarrioId: string | null, barrios: BarrioRef[]): string | null {
+  if (currentBarrioId && barrios.some((barrio) => barrio.id === currentBarrioId)) return currentBarrioId;
+  return barrios[0]?.id ?? currentBarrioId;
+}
+
 export function resolveBarrio(input: {
   profileRole: Role;
   cookie: string | null;
@@ -31,21 +36,35 @@ export function resolveBarrio(input: {
   memberships: MembershipRef[];
   barrios: BarrioRef[];
 }): { role: Role; barrioId: string | null } {
+  const fromCookie =
+    input.cookie && input.cookie !== ALL_BARRIOS
+      ? input.barrios.find((barrio) => barrio.slug === input.cookie)
+      : undefined;
+
   if (input.profileRole === "super_admin") {
-    if (!input.cookie || input.cookie === ALL_BARRIOS) return { role: "super_admin", barrioId: null };
-    const match = input.barrios.find((barrio) => barrio.slug === input.cookie);
-    return { role: "super_admin", barrioId: match?.id ?? null };
+    return { role: "super_admin", barrioId: fromCookie?.id ?? barrioFromProfile(input.currentBarrioId, input.barrios) };
   }
 
-  const fromCookie = input.cookie ? input.barrios.find((barrio) => barrio.slug === input.cookie) : undefined;
-  const membership = fromCookie
+  const cookieMembership = fromCookie
     ? input.memberships.find((row) => row.barrio_id === fromCookie.id)
-    : input.memberships.find((row) => row.barrio_id === input.currentBarrioId) ?? input.memberships[0];
+    : undefined;
+  const membership =
+    cookieMembership ??
+    input.memberships.find((row) => row.barrio_id === input.currentBarrioId) ??
+    input.memberships[0];
 
-  if (!membership) {
-    return { role: input.profileRole, barrioId: input.currentBarrioId };
-  }
-  return { role: membership.role, barrioId: membership.barrio_id };
+  if (membership) return { role: membership.role, barrioId: membership.barrio_id };
+  return { role: input.profileRole, barrioId: barrioFromProfile(input.currentBarrioId, input.barrios) };
+}
+
+export function activePublicSlug(
+  cookie: string | null | undefined,
+  userSlug: string | null | undefined,
+  availableSlugs: readonly string[],
+): string | null {
+  if (userSlug) return userSlug;
+  if (cookie && cookie !== ALL_BARRIOS) return cookie;
+  return availableSlugs[0] ?? null;
 }
 
 export function slugifyBarrio(value: string): string {

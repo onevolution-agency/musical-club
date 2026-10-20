@@ -4,7 +4,8 @@ import { cookies } from "next/headers";
 import { isSupabaseConfigured } from "@/lib/env";
 import type { BarrioRow } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
-import { BARRIO_COOKIE } from "./domain";
+import { getSessionContext } from "@/modules/auth/session";
+import { activePublicSlug, ALL_BARRIOS, BARRIO_COOKIE } from "./domain";
 
 export async function listPublicBarrios(): Promise<BarrioRow[]> {
   if (!isSupabaseConfigured()) return [];
@@ -18,8 +19,12 @@ export async function listPublicBarrios(): Promise<BarrioRow[]> {
 }
 
 export async function publicBarrioSlug(): Promise<string | null> {
+  const session = await getSessionContext();
   const jar = await cookies();
-  const value = jar.get(BARRIO_COOKIE)?.value;
-  if (!value || value === "todos") return null;
-  return value;
+  const cookie = jar.get(BARRIO_COOKIE)?.value ?? null;
+  if (session?.barrio?.slug || (cookie && cookie !== ALL_BARRIOS)) {
+    return activePublicSlug(cookie, session?.barrio?.slug, []);
+  }
+  const barrios = await listPublicBarrios();
+  return activePublicSlug(cookie, null, barrios.map((barrio) => barrio.slug));
 }

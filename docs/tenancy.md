@@ -12,10 +12,10 @@ No vuelvas a aplicar `20261019043000` en producción. Si el CLI marca un checksu
 
 ## Esquema
 
-- `barrios`: nombre, slug, logo, activo, arancel de referencia y frecuencia (`monthly` o `biweekly`). El logo se muestra en el selector del header y en el listado de barrios.
+- `barrios`: nombre, slug, logo, activo, arancel de referencia y frecuencia (`monthly` o `biweekly`). El logo se muestra en el listado de barrios.
 - `barrio_memberships`: una persona puede ser alumna, profe o admin de varios barrios. La clave es `(user_id, barrio_id)`.
 - `profiles.role` suma `super_admin`. Santiago Errecalde y Gaby Bibas quedan en ese rol y, además, como admin de cada barrio de la demo para poder registrar efectivo.
-- `profiles.current_barrio_id` recuerda el barrio activo. La cookie `mc_barrio` guarda el slug, o `todos` para ver todas las actividades (público anónimo y super admin).
+- `profiles.current_barrio_id` recuerda el barrio activo. La cookie `mc_barrio` guarda el slug elegido en el alta. Sin cookie, o con el valor viejo `todos`, el barrio activo es el del perfil y, si no hay, el primero de la lista (las consultas ordenan por nombre).
 - `barrio_id` es obligatorio en actividades, asignaciones, inscripciones, clases, asistencia, cuotas y pagos. En consultas es opcional.
 - El slug de una actividad es único dentro del barrio, no en toda la plataforma.
 - Un trigger copia el `barrio_id` del padre cuando se inserta una fila hija, así el seed y las acciones no tienen que repetirlo en cada pago o marca.
@@ -45,6 +45,6 @@ En una base nueva:
 
 1. Aplicá las migraciones en orden (`supabase db push` en local).
 2. Volvé a correr `npm run seed` (o `supabase db reset` en local). El seed es idempotente: reparte las actividades de sábado en El Talar y las de domingo en Club Nordelta, y arma las membresías. Si un barrio ya tiene `logo_url`, el seed no lo pisa.
-3. Entrá con `santiago.errecalde@musicalclub.test` / `MusicalClub2026`. El tablero arranca en todos los barrios. El selector filtra uno solo.
+3. Entrá con `santiago.errecalde@musicalclub.test` / `MusicalClub2026`. El tablero arranca en el barrio de su perfil (El Talar en la demo).
 
 Las cuentas y la contraseña no cambian. No hay cuentas de padres: los menores siguen siendo alumnos y el adulto queda como contacto de emergencia.

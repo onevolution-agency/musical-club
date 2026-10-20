@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Avatar } from "@/components/brand/avatar";
-import { BarrioSwitcher } from "@/components/brand/barrio-switcher";
 import { Logo } from "@/components/brand/logo";
 import { signOut } from "@/modules/auth/actions";
 import type { SessionContext } from "@/modules/auth/session";
@@ -9,7 +8,6 @@ import type { Role } from "@/lib/supabase/database.types";
 const links: Record<"student" | "teacher" | "admin", { href: string; label: string; tab?: boolean }[]> = {
   student: [
     { href: "/alumno", label: "Inicio", tab: true },
-    { href: "/alumno/actividades", label: "Actividades", tab: true },
     { href: "/alumno/cuotas", label: "Cuotas", tab: true },
     { href: "/alumno/qr", label: "Mi QR", tab: true },
     { href: "/alumno/perfil", label: "Perfil" },
@@ -22,7 +20,6 @@ const links: Record<"student" | "teacher" | "admin", { href: string; label: stri
   admin: [
     { href: "/admin", label: "Tablero", tab: true },
     { href: "/admin/barrios", label: "Barrios" },
-    { href: "/admin/actividades", label: "Actividades" },
     { href: "/admin/profesores", label: "Profes" },
     { href: "/admin/alumnos", label: "Alumnos" },
     { href: "/admin/inscripciones", label: "Inscripciones" },
@@ -73,21 +70,14 @@ export function AppShell({
             <div className="who">
               <p className="kicker">
                 {kicker}
-                {ctx.barrio ? ` · ${ctx.barrio.name}` : ctx.profile.role === "super_admin" ? " · Todos los barrios" : ""}
+                {ctx.barrio ? ` · ${ctx.barrio.name}` : ""}
               </p>
               <p className="display page-title">{title}</p>
             </div>
           </div>
-          <div className="row">
-            <BarrioSwitcher
-              options={ctx.barrios.map((barrio) => ({ slug: barrio.slug, name: barrio.name, logoUrl: barrio.logo_url }))}
-              current={ctx.barrio?.slug ?? null}
-              allowAll={ctx.profile.role === "super_admin"}
-            />
-            <form action={signOut}>
-              <button className="btn btn-ghost">Salir</button>
-            </form>
-          </div>
+          <form action={signOut}>
+            <button className="btn btn-ghost">Salir</button>
+          </form>
         </header>
         {children}
       </div>
