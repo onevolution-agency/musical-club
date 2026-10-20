@@ -87,7 +87,7 @@ Todas las cuentas usan la misma contraseña, **solo desarrollo**: `MusicalClub20
 
 No hay cuentas de padres: cada menor entra con su usuario y el adulto figura como contacto de emergencia. Las edades se calculan al correr el seed para que Kids siga teniendo menos de 12 y el otro grupo 13 o más.
 
-El Talar tiene los sábados (Kids mensual y Jóvenes mensual, con lista de espera). Club Nordelta tiene los domingos (Kids y Jóvenes, cada 15 días). Joaquín cursa Kids en los dos barrios y Julieta cursa Jóvenes en los dos. El selector del sitio y de la app guarda la elección en la cookie `mc_barrio` y en el perfil. Santiago y Gaby pueden ver todos los barrios juntos: el tablero muestra el ingreso de cada uno y el total.
+El Talar tiene los sábados (Kids mensual y Jóvenes mensual, con lista de espera). Club Nordelta tiene los domingos (Kids y Jóvenes, cada 15 días). Joaquín cursa Kids en los dos barrios y Julieta cursa Jóvenes en los dos. El alta guarda el barrio en la cookie `mc_barrio` y en el perfil. Si no hay elección, la app usa el barrio del perfil y, si tampoco está, el primero por nombre. En la demo, Santiago y Gaby entran en El Talar.
 
 En cuotas hay pagos acreditados por Mercado Pago, efectivo con recibo (lo reciben Santiago o Gaby), pendientes, vencidas, un parcial y un efectivo anulado (`REC-1048`). Sofía tiene el mes pago por Mercado Pago; Benjamín y Franco tienen mora; Thiago tiene el efectivo anulado; Olivia tiene un pago parcial del período que viene; Renata está en lista de espera el sábado y activa el domingo.
 

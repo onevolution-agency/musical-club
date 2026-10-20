@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EL_TALAR_ID, NORDELTA_ID, resolveBarrio, roleAllows, slugifyBarrio } from "./domain";
+import { activePublicSlug, EL_TALAR_ID, NORDELTA_ID, resolveBarrio, roleAllows, slugifyBarrio } from "./domain";
 
 const barrios = [
   { id: EL_TALAR_ID, slug: "el-talar", name: "El Talar" },
@@ -7,7 +7,7 @@ const barrios = [
 ];
 
 describe("barrio resolution", () => {
-  it("lets a super admin see every barrio until they pick one", () => {
+  it("uses the profile barrio when a super admin has not chosen one", () => {
     expect(
       resolveBarrio({
         profileRole: "super_admin",
@@ -16,7 +16,28 @@ describe("barrio resolution", () => {
         memberships: [{ barrio_id: EL_TALAR_ID, role: "admin" }],
         barrios,
       }),
-    ).toEqual({ role: "super_admin", barrioId: null });
+    ).toEqual({ role: "super_admin", barrioId: EL_TALAR_ID });
+  });
+
+  it("uses the first barrio when there is no profile barrio", () => {
+    expect(
+      resolveBarrio({
+        profileRole: "super_admin",
+        cookie: "todos",
+        currentBarrioId: null,
+        memberships: [],
+        barrios,
+      }).barrioId,
+    ).toBe(EL_TALAR_ID);
+    expect(
+      resolveBarrio({
+        profileRole: "student",
+        cookie: null,
+        currentBarrioId: null,
+        memberships: [],
+        barrios,
+      }).barrioId,
+    ).toBe(EL_TALAR_ID);
   });
 
   it("filters a super admin to the chosen barrio", () => {
@@ -45,6 +66,30 @@ describe("barrio resolution", () => {
     expect(resolved).toEqual({ role: "teacher", barrioId: NORDELTA_ID });
   });
 
+  it("falls back to the profile barrio and then the first membership", () => {
+    expect(
+      resolveBarrio({
+        profileRole: "student",
+        cookie: null,
+        currentBarrioId: NORDELTA_ID,
+        memberships: [
+          { barrio_id: EL_TALAR_ID, role: "student" },
+          { barrio_id: NORDELTA_ID, role: "student" },
+        ],
+        barrios,
+      }).barrioId,
+    ).toBe(NORDELTA_ID);
+    expect(
+      resolveBarrio({
+        profileRole: "student",
+        cookie: null,
+        currentBarrioId: null,
+        memberships: [{ barrio_id: NORDELTA_ID, role: "student" }],
+        barrios,
+      }).barrioId,
+    ).toBe(NORDELTA_ID);
+  });
+
   it("ignores a cookie for a barrio the person does not belong to", () => {
     const resolved = resolveBarrio({
       profileRole: "student",
@@ -65,5 +110,12 @@ describe("barrio resolution", () => {
 
   it("slugifies barrio names", () => {
     expect(slugifyBarrio("Club Nordelta")).toBe("club-nordelta");
+  });
+
+  it("picks the signed-in barrio, then the cookie, then the first public barrio", () => {
+    expect(activePublicSlug("el-talar", "club-nordelta", ["el-talar", "club-nordelta"])).toBe("club-nordelta");
+    expect(activePublicSlug("el-talar", null, ["club-nordelta"])).toBe("el-talar");
+    expect(activePublicSlug(null, null, ["club-nordelta", "el-talar"])).toBe("club-nordelta");
+    expect(activePublicSlug("todos", null, ["el-talar"])).toBe("el-talar");
   });
 });
