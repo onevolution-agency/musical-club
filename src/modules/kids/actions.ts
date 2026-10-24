@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import type { ActionResult } from "@/modules/auth/actions";
 import { requireRole } from "@/modules/auth/session";
 import { CHILD_COOKIE, kidBirthOk } from "./domain";
-import { canManageChild } from "./session";
+import { canFollowChild, canManageChild } from "./session";
 import { todayInArgentina } from "@/lib/time";
 
 function knownError(message: string, fallback: string): string {
@@ -21,6 +21,11 @@ function knownError(message: string, fallback: string): string {
     "No encontramos ese vínculo",
     "Ese responsable no tiene cuenta",
     "No autorizado",
+    "La edad tiene que ser de 13 a 17.",
+    "Ya lo sigue",
+    "No está en ese barrio",
+    "No podés quitar el seguimiento",
+    "No encontramos ese pedido",
   ];
   return known.find((item) => message.includes(item)) ?? fallback;
 }
@@ -40,7 +45,7 @@ export async function chooseChild(formData: FormData): Promise<ActionResult> {
   const jar = await cookies();
   if (childId === "yo") {
     jar.set(CHILD_COOKIE, "yo", { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 365 });
-  } else if (await canManageChild(ctx, childId)) {
+  } else if ((await canManageChild(ctx, childId)) || (await canFollowChild(ctx, childId))) {
     jar.set(CHILD_COOKIE, childId, { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 365 });
   } else {
     return { ok: false, error: "No autorizado" };

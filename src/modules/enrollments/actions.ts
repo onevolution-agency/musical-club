@@ -12,6 +12,7 @@ import type { EnrollmentStatus } from "@/lib/supabase/database.types";
 export async function enrollSelf(formData: FormData): Promise<ActionResult> {
   const ctx = await requireRole(["student"]);
   const family = await activeStudent(ctx);
+  if (family.mode === "follow") return { ok: false, error: "No podés cambiar esa inscripción." };
   const activityId = String(formData.get("activityId") ?? "");
   if (!activityId) return { ok: false, error: "Falta la actividad." };
   const { data: activity } = await ctx.supabase.from("activities").select("*").eq("id", activityId).maybeSingle();

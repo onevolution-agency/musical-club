@@ -34,7 +34,7 @@ export default async function StudentActivities() {
               {frequencyLabel[activity.billing_frequency]}
               {activity.price_cents > 0 ? ` · ${formatARS(activity.price_cents)}` : ""}
             </p>
-            {active ? (
+            {family.mode === "follow" ? null : active ? (
               <ActionForm action={cancelEnrollment}>
                 <input type="hidden" name="enrollmentId" value={enrollment.id} />
                 <SubmitButton className="btn btn-ghost">Cancelar inscripción</SubmitButton>

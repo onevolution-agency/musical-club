@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isLocalSite, mercadoPagoToken, siteUrl } from "@/lib/env";
 import { todayInArgentina } from "@/lib/time";
 import { requireRole } from "@/modules/auth/session";
-import { canManageChild } from "@/modules/kids/session";
+import { canFollowChild, canManageChild } from "@/modules/kids/session";
 import type { ActionResult } from "@/modules/auth/actions";
 import type { FeeRow, FeeStatus, PaymentRow } from "@/lib/supabase/database.types";
 import {
@@ -220,7 +220,8 @@ export async function startMercadoPagoCheckout(formData: FormData): Promise<Acti
   const feeId = String(formData.get("feeId") ?? "");
   const { data: fee } = await ctx.supabase.from("fees").select("*").eq("id", feeId).maybeSingle();
   const manages = fee ? await canManageChild(ctx, fee.student_id) : false;
-  if (!fee || (fee.student_id !== ctx.userId && !manages)) return { ok: false, error: "No encontramos esa cuota." };
+  const follows = fee ? await canFollowChild(ctx, fee.student_id) : false;
+  if (!fee || (fee.student_id !== ctx.userId && !manages && !follows)) return { ok: false, error: "No encontramos esa cuota." };
   if (fee.status === "paid" || fee.status === "void") return { ok: false, error: "Esa cuota no está para pagar." };
   const { data: payments } = await ctx.supabase.from("payments").select("*").eq("fee_id", fee.id);
   const open = (payments ?? []).find((payment) => payment.method === "mercadopago" && payment.status === "pending" && payment.checkout_url);
@@ -272,7 +273,8 @@ export async function syncMercadoPagoPayment(formData: FormData): Promise<Action
     ctx.profile.role !== "admin" &&
     ctx.role !== "super_admin" &&
     payment.student_id !== ctx.userId &&
-    !(await canManageChild(ctx, payment.student_id))
+    !(await canManageChild(ctx, payment.student_id)) &&
+    !(await canFollowChild(ctx, payment.student_id))
   ) {
     return { ok: false, error: "Ese pago no es tuyo." };
   }

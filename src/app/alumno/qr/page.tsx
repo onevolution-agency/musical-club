@@ -10,6 +10,7 @@ export const metadata: Metadata = { title: { absolute: "Mi QR · Musical Club" }
 export default async function QrPage() {
   const ctx = await requireRole(["student"]);
   const family = await activeStudent(ctx);
+  if (family.mode === "follow") return <p className="empty">No disponible.</p>;
   const secret = attendanceSecret();
   if (!secret) {
     return <p className="form-error">Falta configurar ATTENDANCE_QR_SECRET para generar el código.</p>;
