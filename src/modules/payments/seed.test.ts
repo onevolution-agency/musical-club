@@ -24,6 +24,8 @@ const accounts = [
   "julieta.paredes@musicalclub.test",
   "agustin.molina@musicalclub.test",
   "renata.acosta@musicalclub.test",
+  "carolina.herrera@musicalclub.test",
+  "diego.herrera@musicalclub.test",
 ];
 
 describe("demo seed", () => {
@@ -42,5 +44,10 @@ describe("demo seed", () => {
     expect(seed).toContain("club-nordelta");
     expect(seed).toContain("super_admin");
     expect(seed).toContain("barrio_memberships");
+    expect(seed).toContain("account_kind");
+    expect(seed).toContain("'kid'");
+    expect(seed).toContain("Lola Herrera");
+    expect(seed).toContain("Theo Herrera");
+    expect(seed).not.toContain("lola.herrera@");
   });
 });

@@ -21,11 +21,28 @@ export default async function SessionPage({ params }: { params: Promise<{ sessio
     .eq("status", "active");
   const studentIds = (enrollments ?? []).map((row) => row.student_id);
   const { data: profiles } = studentIds.length
-    ? await ctx.supabase.from("profiles").select("id, full_name, avatar_url").in("id", studentIds)
+    ? await ctx.supabase.from("profiles").select("id, full_name, avatar_url, account_kind").in("id", studentIds)
+    : { data: [] };
+  const { data: links } = studentIds.length
+    ? await ctx.supabase.from("guardianships").select("child_id, guardian_id").in("child_id", studentIds)
+    : { data: [] };
+  const guardianIds = [...new Set((links ?? []).map((link) => link.guardian_id))];
+  const { data: guardians } = guardianIds.length
+    ? await ctx.supabase.from("profiles").select("id, full_name, phone, email").in("id", guardianIds)
     : { data: [] };
   const { data: marks } = await ctx.supabase.from("attendance_marks").select("student_id").eq("session_id", sessionId);
   const present = new Set((marks ?? []).map((mark) => mark.student_id));
   const names = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
+  const contactFor = (studentId: string) =>
+    (links ?? [])
+      .filter((link) => link.child_id === studentId)
+      .map((link) => {
+        const guardian = guardians?.find((item) => item.id === link.guardian_id);
+        if (!guardian) return "";
+        return [guardian.full_name, guardian.phone || guardian.email].filter(Boolean).join(" · ");
+      })
+      .filter(Boolean)
+      .join(" / ");
   const roster = (enrollments ?? [])
     .map((enrollment) => {
       const profile = names.get(enrollment.student_id);
@@ -34,6 +51,8 @@ export default async function SessionPage({ params }: { params: Promise<{ sessio
         name: profile?.full_name || "Sin nombre",
         avatarUrl: profile?.avatar_url ?? null,
         present: present.has(enrollment.student_id),
+        kid: profile?.account_kind === "kid",
+        contact: profile?.account_kind === "kid" ? contactFor(enrollment.student_id) : null,
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name, "es"));
@@ -58,6 +77,8 @@ export default async function SessionPage({ params }: { params: Promise<{ sessio
                 <span className="person" style={{ flex: 1 }}>
                   <Avatar name={row.name} url={row.avatarUrl} size={44} />
                   {row.name}
+                  {row.kid ? <span className="badge">Kid</span> : null}
+                  {row.contact ? <span className="hint">{row.contact}</span> : null}
                 </span>
                 <SubmitButton className="btn btn-paper">{row.present ? "Ya está" : "Presente"}</SubmitButton>
               </ActionForm>
@@ -74,7 +95,8 @@ export default async function SessionPage({ params }: { params: Promise<{ sessio
             <li key={row.id}>
               <span className="person">
                 <Avatar name={row.name} url={row.avatarUrl} size={36} />
-                {row.name} {row.present ? "· presente" : "· ausente"}
+                {row.name} {row.kid ? <span className="badge">Kid</span> : null} {row.present ? "· presente" : "· ausente"}
+                {row.contact ? <span className="hint">{row.contact}</span> : null}
               </span>
             </li>
           ))}

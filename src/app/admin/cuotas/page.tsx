@@ -20,7 +20,7 @@ export default async function AdminFees({ searchParams }: { searchParams: Promis
   if (filters.actividad) query = query.eq("activity_id", filters.actividad);
   const { data: fees } = await query;
   const { data: activities } = await scopeBarrio(ctx.supabase.from("activities").select("id, name, price_cents, billing_frequency"), ctx.barrioId);
-  const { data: students } = await ctx.supabase.from("profiles").select("id, full_name");
+  const { data: students } = await ctx.supabase.from("profiles").select("id, full_name, account_kind");
   const ids = (fees ?? []).map((fee) => fee.id);
   const { data: payments } = ids.length ? await ctx.supabase.from("payments").select("*").in("fee_id", ids) : { data: [] };
   return (
@@ -82,7 +82,9 @@ export default async function AdminFees({ searchParams }: { searchParams: Promis
         return (
           <article key={fee.id} className="panel">
             <h2 className="display" style={{ fontSize: "1.3rem" }}>
-              {students?.find((student) => student.id === fee.student_id)?.full_name} · {activities?.find((activity) => activity.id === fee.activity_id)?.name}
+              {students?.find((student) => student.id === fee.student_id)?.full_name}{" "}
+              {students?.find((student) => student.id === fee.student_id)?.account_kind === "kid" ? <span className="badge">Kid</span> : null} ·{" "}
+              {activities?.find((activity) => activity.id === fee.activity_id)?.name}
             </h2>
             <p>
               {formatDateAR(fee.period_start)} – {formatDateAR(fee.period_end)} · <span className="badge">{feeStatusLabel[fee.status]}</span>{" "}

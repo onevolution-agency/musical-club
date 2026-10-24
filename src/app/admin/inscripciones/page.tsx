@@ -57,6 +57,7 @@ export default async function EnrollmentsPage({ searchParams }: { searchParams: 
             {(students ?? []).map((student) => (
               <option key={student.id} value={student.id}>
                 {student.full_name || student.email}
+                {student.account_kind === "kid" ? " · Kid" : ""}
               </option>
             ))}
           </select>
@@ -93,7 +94,12 @@ export default async function EnrollmentsPage({ searchParams }: { searchParams: 
           <tbody>
             {(enrollments ?? []).map((enrollment) => (
               <tr key={enrollment.id}>
-                <td>{students?.find((student) => student.id === enrollment.student_id)?.full_name}</td>
+                <td>
+                  {students?.find((student) => student.id === enrollment.student_id)?.full_name}{" "}
+                  {students?.find((student) => student.id === enrollment.student_id)?.account_kind === "kid" ? (
+                    <span className="badge">Kid</span>
+                  ) : null}
+                </td>
                 <td>{activities?.find((activity) => activity.id === enrollment.activity_id)?.name}</td>
                 <td>
                   <ActionForm action={setEnrollmentStatus} className="row">

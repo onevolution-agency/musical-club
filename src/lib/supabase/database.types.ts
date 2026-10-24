@@ -21,6 +21,7 @@ export type ProfileRow = {
   emergency_contact: string | null;
   avatar_url: string | null;
   current_barrio_id: string | null;
+  account_kind: "user" | "kid";
   created_at: string;
   updated_at: string;
 };
@@ -182,6 +183,39 @@ export type ActivityTeacherRow = {
   assigned_at: string;
 };
 
+export type GuardianAccess = "manager" | "contact";
+export type GuardianAuditAction = "create" | "link" | "unlink" | "release";
+
+export type GuardianshipRow = {
+  id: string;
+  guardian_id: string;
+  child_id: string;
+  barrio_id: string;
+  access: GuardianAccess;
+  created_at: string;
+};
+
+export type GuardianInviteRow = {
+  id: string;
+  email: string;
+  child_id: string;
+  barrio_id: string;
+  invited_by: string | null;
+  accepted_at: string | null;
+  created_at: string;
+};
+
+export type GuardianAuditRow = {
+  id: string;
+  child_id: string;
+  guardian_id: string | null;
+  actor_id: string | null;
+  barrio_id: string | null;
+  action: GuardianAuditAction;
+  note: string | null;
+  created_at: string;
+};
+
 type Table<T> = {
   Row: T;
   Insert: Partial<T> & Record<string, unknown>;
@@ -215,9 +249,39 @@ export type Database = {
       }>;
       inquiries: Table<InquiryRow>;
       staff_invites: Table<InviteRow>;
+      guardianships: Table<GuardianshipRow>;
+      guardian_invites: Table<GuardianInviteRow>;
+      guardian_audit: Table<GuardianAuditRow>;
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      create_child: {
+        Args: {
+          first_name: string;
+          last_name: string;
+          birth_date: string;
+          barrio_id: string;
+          guardian_id: string | null;
+        };
+        Returns: string;
+      };
+      update_child: {
+        Args: { child_id: string; first_name: string; last_name: string; birth_date: string };
+        Returns: null;
+      };
+      invite_guardian: {
+        Args: { child_id: string; email: string };
+        Returns: null;
+      };
+      unlink_guardian: {
+        Args: { child_id: string; guardian_id: string };
+        Returns: null;
+      };
+      release_child: {
+        Args: { child_id: string; email: string; password: string };
+        Returns: null;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };

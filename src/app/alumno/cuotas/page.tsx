@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
 import { requireRole } from "@/modules/auth/session";
+import { activeStudent } from "@/modules/kids/session";
 import { feeStatusLabel, paymentMethodLabel, paymentStatusLabel } from "@/modules/activities/labels";
 import { startMercadoPagoCheckout } from "@/modules/payments/actions";
 import { remainingCents, type PaymentSnapshot } from "@/modules/payments/domain";
@@ -11,7 +12,8 @@ export const metadata: Metadata = { title: { absolute: "Cuotas · Musical Club" 
 export default async function FeesPage({ searchParams }: { searchParams: Promise<{ pago?: string }> }) {
   const params = await searchParams;
   const ctx = await requireRole(["student"]);
-  const { data: fees } = await ctx.supabase.from("fees").select("*").eq("student_id", ctx.userId).order("due_date", { ascending: false });
+  const family = await activeStudent(ctx);
+  const { data: fees } = await ctx.supabase.from("fees").select("*").eq("student_id", family.id).order("due_date", { ascending: false });
   const feeIds = (fees ?? []).map((fee) => fee.id);
   const { data: payments } = feeIds.length
     ? await ctx.supabase.from("payments").select("*").in("fee_id", feeIds).order("created_at", { ascending: false })

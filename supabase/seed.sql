@@ -4,8 +4,10 @@
 -- Idempotente: se puede correr con `supabase db reset` o `npm run seed`.
 -- Reemplaza las cuatro actividades de demo y sus inscripciones, sesiones,
 -- cuotas y pagos. Vuelve a dejar la contraseña documentada.
--- No hay cuentas de padres: los menores son alumnos y el adulto queda
--- como contacto de emergencia.
+-- Responsables con login (password MusicalClub2026) y kids sin usuario:
+--   carolina.herrera@musicalclub.test administra a Lola y Theo
+--   diego.herrera@musicalclub.test administra a Lola
+-- Lola y Theo no tienen mail ni contraseña. Lola cursa Grupo Kids.
 --
 -- Barrios de demo: El Talar (sábados, mensual) y Club Nordelta (domingos, cada 15 días).
 -- Santiago y Gaby son super admin y ven los dos. Valentina, Lucía, Joaquín y Julieta
@@ -35,6 +37,9 @@
 --   julieta.paredes@musicalclub.test
 --   agustin.molina@musicalclub.test
 --   renata.acosta@musicalclub.test
+-- Responsables
+--   carolina.herrera@musicalclub.test
+--   diego.herrera@musicalclub.test
 
 create extension if not exists pgcrypto with schema extensions;
 
@@ -108,7 +113,9 @@ begin
     ('c2222222-2222-4222-8222-000000000004', 'nicolas.vega@musicalclub.test', 'Nicolás Vega', 'student', '+54 9 11 5000-0104', '90113004', (today - interval '22 years')::date, null),
     ('c2222222-2222-4222-8222-000000000005', 'julieta.paredes@musicalclub.test', 'Julieta Paredes', 'student', '+54 9 11 5000-0105', '90113005', (today - interval '34 years')::date, null),
     ('c2222222-2222-4222-8222-000000000006', 'agustin.molina@musicalclub.test', 'Agustín Molina', 'student', '+54 9 11 5000-0106', '90113006', (today - interval '14 years')::date, 'Verónica Molina (mamá) · +54 9 11 5555-0206'),
-    ('c2222222-2222-4222-8222-000000000007', 'renata.acosta@musicalclub.test', 'Renata Acosta', 'student', '+54 9 11 5000-0107', '90113007', (today - interval '39 years')::date, null);
+    ('c2222222-2222-4222-8222-000000000007', 'renata.acosta@musicalclub.test', 'Renata Acosta', 'student', '+54 9 11 5000-0107', '90113007', (today - interval '39 years')::date, null),
+    ('d3333333-3333-4333-8333-000000000001', 'carolina.herrera@musicalclub.test', 'Carolina Herrera', 'student', '+54 9 11 5555-0101', '27111001', (today - interval '38 years')::date, null),
+    ('d3333333-3333-4333-8333-000000000002', 'diego.herrera@musicalclub.test', 'Diego Herrera', 'student', '+54 9 11 5555-0190', '27111002', (today - interval '40 years')::date, null);
 
   if exists (
     select 1
@@ -282,6 +289,56 @@ begin
     'renata.acosta@musicalclub.test'
   );
 
+  insert into public.profiles (id, role, full_name, email, birth_date, account_kind, current_barrio_id)
+  values
+    (
+      'd4444444-4444-4444-8444-000000000001',
+      'student',
+      'Lola Herrera',
+      null,
+      (today - interval '8 years')::date,
+      'kid',
+      'b1000000-0000-4000-8000-000000000001'
+    ),
+    (
+      'd4444444-4444-4444-8444-000000000002',
+      'student',
+      'Theo Herrera',
+      null,
+      (today - interval '6 years')::date,
+      'kid',
+      'b1000000-0000-4000-8000-000000000001'
+    )
+  on conflict (id) do update set
+    full_name = excluded.full_name,
+    birth_date = excluded.birth_date
+  where public.profiles.account_kind = 'kid';
+
+  insert into public.barrio_memberships (user_id, barrio_id, role)
+  values
+    ('d4444444-4444-4444-8444-000000000001', 'b1000000-0000-4000-8000-000000000001', 'student'),
+    ('d4444444-4444-4444-8444-000000000002', 'b1000000-0000-4000-8000-000000000001', 'student')
+  on conflict (user_id, barrio_id) do nothing;
+
+  insert into public.guardianships (guardian_id, child_id, barrio_id, access)
+  values
+    ('d3333333-3333-4333-8333-000000000001', 'd4444444-4444-4444-8444-000000000001', 'b1000000-0000-4000-8000-000000000001', 'manager'),
+    ('d3333333-3333-4333-8333-000000000002', 'd4444444-4444-4444-8444-000000000001', 'b1000000-0000-4000-8000-000000000001', 'manager'),
+    ('d3333333-3333-4333-8333-000000000001', 'd4444444-4444-4444-8444-000000000002', 'b1000000-0000-4000-8000-000000000001', 'manager')
+  on conflict (guardian_id, child_id) do nothing;
+
+  insert into public.guardian_audit (child_id, guardian_id, actor_id, barrio_id, action, note)
+  select v.child_id, v.guardian_id, v.guardian_id, v.barrio_id, 'create', v.note
+  from (
+    values
+      ('d4444444-4444-4444-8444-000000000001'::uuid, 'd3333333-3333-4333-8333-000000000001'::uuid, 'b1000000-0000-4000-8000-000000000001'::uuid, 'Lola Herrera'),
+      ('d4444444-4444-4444-8444-000000000002'::uuid, 'd3333333-3333-4333-8333-000000000001'::uuid, 'b1000000-0000-4000-8000-000000000001'::uuid, 'Theo Herrera')
+  ) as v(child_id, guardian_id, barrio_id, note)
+  where not exists (
+    select 1 from public.guardian_audit a
+    where a.child_id = v.child_id and a.action = 'create'
+  );
+
   delete from public.payments pay
   using public.fees f, public.activities a
   where pay.fee_id = f.id
@@ -388,6 +445,15 @@ begin
     'thiago.romero@musicalclub.test',
     'olivia.suarez@musicalclub.test',
     'joaquin.pereyra@musicalclub.test'
+  );
+
+  insert into public.enrollments (activity_id, student_id, status, starts_on, notes)
+  values (
+    'd1111111-1111-4111-8111-000000000001',
+    'd4444444-4444-4444-8444-000000000001',
+    'active',
+    month_2,
+    null
   );
 
   insert into public.enrollments (activity_id, student_id, status, starts_on, notes)

@@ -26,8 +26,9 @@ export default async function PaymentsPage({
     query = query.eq("status", filters.estado as PaymentStatus);
   }
   const { data: payments } = await query;
-  const { data: profiles } = await ctx.supabase.from("profiles").select("id, full_name");
+  const { data: profiles } = await ctx.supabase.from("profiles").select("id, full_name, account_kind");
   const names = new Map((profiles ?? []).map((profile) => [profile.id, profile.full_name || "Sin nombre"]));
+  const kids = new Set((profiles ?? []).filter((profile) => profile.account_kind === "kid").map((profile) => profile.id));
   const inRange = (payments ?? []).filter((payment) => {
     const day = (payment.paid_at ?? payment.created_at).slice(0, 10);
     return day >= from && day <= to;
@@ -92,7 +93,7 @@ export default async function PaymentsPage({
             <span className="badge badge-gold">{paymentStatusLabel[payment.status]}</span> {formatARS(payment.amount_cents)}
           </p>
           <p>
-            {names.get(payment.student_id)} · {formatDateTimeAR(payment.paid_at ?? payment.created_at)}
+            {names.get(payment.student_id)} {kids.has(payment.student_id) ? <span className="badge">Kid</span> : null} · {formatDateTimeAR(payment.paid_at ?? payment.created_at)}
           </p>
           {payment.method === "efectivo" ? <p>Recibió {names.get(payment.received_by ?? "") ?? "—"} {payment.receipt_number ? `· recibo ${payment.receipt_number}` : ""}</p> : null}
           {payment.note ? <p>{payment.note}</p> : null}
