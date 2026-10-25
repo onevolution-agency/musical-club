@@ -4,7 +4,10 @@ import { ActionForm, SubmitButton } from "@/components/ui/forms";
 import { ReleaseFields } from "@/components/kids/family";
 import { requireRole } from "@/modules/auth/session";
 import { profilesInBarrio } from "@/modules/barrios/members";
+import { adminLinkFollow, endFollow } from "@/modules/follow/actions";
+import { teenBirthOk } from "@/modules/follow/domain";
 import { createChildAsAdmin, inviteGuardian, releaseChild, unlinkGuardian } from "@/modules/kids/actions";
+import { todayInArgentina } from "@/lib/time";
 
 export const metadata: Metadata = { title: { absolute: "Alumnos · Musical Club" } };
 
@@ -14,7 +17,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
   const students = await profilesInBarrio(ctx, ["student"], q ?? "");
   const studentIds = students.map((student) => student.id);
   const { data: links } = studentIds.length
-    ? await ctx.supabase.from("guardianships").select("child_id, guardian_id, access").in("child_id", studentIds)
+    ? await ctx.supabase.from("guardianships").select("child_id, guardian_id, access, ended_at").in("child_id", studentIds)
     : { data: [] };
   const guardianIds = [...new Set((links ?? []).map((link) => link.guardian_id))];
   const { data: guardians } = guardianIds.length
@@ -51,12 +54,15 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                     <Avatar name={student.full_name || "Alumno"} url={student.avatar_url} size={36} />
                     {student.full_name}
                     {student.account_kind === "kid" ? <span className="badge">Kid</span> : null}
+                    {(links ?? []).some((link) => link.child_id === student.id && link.access === "follow" && !link.ended_at) ? (
+                      <span className="badge">Seguimiento</span>
+                    ) : null}
                   </span>
                 </td>
                 <td>
                   {student.account_kind === "kid" || (links ?? []).some((link) => link.child_id === student.id)
                     ? (links ?? [])
-                        .filter((link) => link.child_id === student.id)
+                        .filter((link) => link.child_id === student.id && !(link.access === "follow" && link.ended_at))
                         .map((link) => {
                           const guardian = guardians?.find((item) => item.id === link.guardian_id);
                           if (!guardian) return link.access === "contact" ? "Contacto" : "Responsable";
@@ -127,6 +133,39 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
               <SubmitButton className="btn btn-paper">Invitar</SubmitButton>
             </ActionForm>
             <ReleaseFields childId={student.id} action={releaseChild} />
+          </article>
+        ))}
+      {students
+        .filter((student) => student.account_kind !== "kid" && teenBirthOk(student.birth_date, todayInArgentina()))
+        .map((student) => (
+          <article key={student.id} className="panel stack">
+            <h2 className="display" style={{ fontSize: "1.5rem" }}>
+              {student.full_name}
+              {(links ?? []).some((link) => link.child_id === student.id && link.access === "follow" && !link.ended_at) ? (
+                <span className="badge">Seguimiento</span>
+              ) : null}
+            </h2>
+            {(links ?? [])
+              .filter((link) => link.child_id === student.id && link.access === "follow" && !link.ended_at)
+              .map((link) => {
+                const guardian = guardians?.find((item) => item.id === link.guardian_id);
+                return (
+                  <ActionForm key={link.guardian_id} action={endFollow} className="row">
+                    <input type="hidden" name="childId" value={student.id} />
+                    <input type="hidden" name="guardianId" value={link.guardian_id} />
+                    <span style={{ flex: 1 }}>{guardian?.full_name || "Responsable"}</span>
+                    <SubmitButton className="btn btn-ghost">Quitar</SubmitButton>
+                  </ActionForm>
+                );
+              })}
+            <ActionForm action={adminLinkFollow} className="row">
+              <input type="hidden" name="teenId" value={student.id} />
+              <label className="field" style={{ flex: 1 }}>
+                <span>Email</span>
+                <input name="email" type="email" required />
+              </label>
+              <SubmitButton className="btn btn-paper">Vincular</SubmitButton>
+            </ActionForm>
           </article>
         ))}
     </div>

@@ -34,6 +34,7 @@ export type BarrioRow = {
   active: boolean;
   default_price_cents: number;
   default_billing_frequency: BillingFrequency;
+  teen_can_unfollow: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -183,8 +184,11 @@ export type ActivityTeacherRow = {
   assigned_at: string;
 };
 
-export type GuardianAccess = "manager" | "contact";
-export type GuardianAuditAction = "create" | "link" | "unlink" | "release";
+export type GuardianAccess = "manager" | "contact" | "follow";
+export type GuardianAuditAction = "create" | "link" | "unlink" | "release" | "request" | "accept" | "decline" | "end";
+export type FollowDirection = "teen_invite" | "guardian_request";
+export type FollowRequestStatus = "pending" | "accepted" | "declined" | "ended";
+export type NoticeKind = "absence" | "overdue";
 
 export type GuardianshipRow = {
   id: string;
@@ -192,7 +196,32 @@ export type GuardianshipRow = {
   child_id: string;
   barrio_id: string;
   access: GuardianAccess;
+  ended_at: string | null;
+  notify: boolean;
   created_at: string;
+};
+
+export type FollowRequestRow = {
+  id: string;
+  teen_id: string;
+  guardian_id: string | null;
+  email: string;
+  barrio_id: string;
+  direction: FollowDirection;
+  status: FollowRequestStatus;
+  created_at: string;
+  resolved_at: string | null;
+};
+
+export type GuardianNoticeRow = {
+  id: string;
+  guardian_id: string;
+  child_id: string;
+  barrio_id: string;
+  kind: NoticeKind;
+  source_id: string;
+  created_at: string;
+  read_at: string | null;
 };
 
 export type GuardianInviteRow = {
@@ -252,6 +281,8 @@ export type Database = {
       guardianships: Table<GuardianshipRow>;
       guardian_invites: Table<GuardianInviteRow>;
       guardian_audit: Table<GuardianAuditRow>;
+      follow_requests: Table<FollowRequestRow>;
+      guardian_notices: Table<GuardianNoticeRow>;
     };
     Views: Record<string, never>;
     Functions: {
@@ -281,6 +312,15 @@ export type Database = {
         Args: { child_id: string; email: string; password: string };
         Returns: null;
       };
+      expire_follows: { Args: Record<string, never>; Returns: null };
+      refresh_follow_notices: { Args: Record<string, never>; Returns: null };
+      invite_follower: { Args: { email: string; barrio_id: string }; Returns: null };
+      request_follow: { Args: { email: string; barrio_id: string }; Returns: null };
+      resolve_follow: { Args: { request_id: string; accept: boolean }; Returns: null };
+      end_follow: { Args: { child_id: string; guardian_id: string }; Returns: null };
+      admin_link_follow: { Args: { teen_id: string; email: string; barrio_id: string }; Returns: null };
+      set_follow_notify: { Args: { child_id: string; enabled: boolean }; Returns: null };
+      mark_notice_read: { Args: { notice_id: string }; Returns: null };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

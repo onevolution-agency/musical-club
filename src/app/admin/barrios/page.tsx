@@ -51,6 +51,15 @@ export default async function BarriosPage({ searchParams }: { searchParams: Prom
           <input type="checkbox" name="active" defaultChecked={current ? current.active : true} style={{ width: 24, height: 24 }} />
           <span>Activo</span>
         </label>
+        <label className="row">
+          <input
+            type="checkbox"
+            name="teenCanUnfollow"
+            defaultChecked={current ? current.teen_can_unfollow : true}
+            style={{ width: 24, height: 24 }}
+          />
+          <span>Puede quitarlo</span>
+        </label>
         <SubmitButton>{id || !canCreate ? "Guardar barrio" : "Crear barrio"}</SubmitButton>
       </ActionForm>
       {(barrios ?? []).length === 0 ? <p className="empty">No hay barrios.</p> : null}

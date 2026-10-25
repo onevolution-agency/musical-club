@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireRole, scopeBarrio } from "@/modules/auth/session";
+import { markNoticeRead } from "@/modules/follow/actions";
 import { activeStudent } from "@/modules/kids/session";
+import { ActionForm, SubmitButton } from "@/components/ui/forms";
 import { ageGroupCopy, weekdays } from "@/modules/activities/labels";
 import { feeStatusLabel } from "@/modules/activities/labels";
 import { formatARS, formatDateAR } from "@/lib/time";
@@ -35,15 +37,28 @@ export default async function StudentHome() {
         .eq("student_id", family.id)
         .order("marked_at", { ascending: false })
         .limit(6);
+  const { data: notices } =
+    family.mode === "follow"
+      ? await ctx.supabase
+          .from("guardian_notices")
+          .select("id, kind, created_at, read_at")
+          .eq("child_id", family.id)
+          .is("read_at", null)
+          .order("created_at", { ascending: false })
+          .limit(8)
+      : { data: [] };
   return (
     <div className="stack">
       <h1 className="display" style={{ fontSize: "2.4rem" }}>
         Hola{family.profile.full_name ? `, ${family.profile.full_name}` : ""}
       </h1>
+      {family.mode === "follow" ? <p className="kicker">Seguimiento</p> : null}
       <div className="row">
-        <Link className="btn btn-red" href="/alumno/qr">
-          Mostrar mi QR
-        </Link>
+        {family.mode === "follow" ? null : (
+          <Link className="btn btn-red" href="/alumno/qr">
+            Mostrar mi QR
+          </Link>
+        )}
         <Link className="btn btn-ghost" href="/alumno/cuotas">
           Ver cuotas
         </Link>
@@ -95,6 +110,21 @@ export default async function StudentHome() {
           ))}
         </ul>
       </section>
+      {family.mode === "follow" ? (
+        <section>
+          <h2 className="display" style={{ fontSize: "1.8rem" }}>
+            Avisos
+          </h2>
+          {(notices ?? []).length === 0 ? <p className="empty">Sin avisos.</p> : null}
+          {(notices ?? []).map((notice) => (
+            <ActionForm key={notice.id} action={markNoticeRead} className="row">
+              <input type="hidden" name="noticeId" value={notice.id} />
+              <span style={{ flex: 1 }}>{notice.kind === "absence" ? "Falta" : "Cuota vencida"}</span>
+              <SubmitButton className="btn btn-paper">Listo</SubmitButton>
+            </ActionForm>
+          ))}
+        </section>
+      ) : null}
       {family.self ? null : (
         <section>
           <h2 className="display" style={{ fontSize: "1.8rem" }}>

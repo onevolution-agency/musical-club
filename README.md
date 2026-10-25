@@ -83,10 +83,10 @@ Todas las cuentas usan la misma contraseña, **solo desarrollo**: `MusicalClub20
 | Profe (Jóvenes sábado) | `mateo.alvarez@musicalclub.test` | El Talar |
 | Profe (Jóvenes sábado y domingo) | `lucia.ferreyra@musicalclub.test` | Los dos |
 | Alumno Kids | `sofia.herrera@musicalclub.test`, `benjamin.castro@musicalclub.test`, `emma.lopez@musicalclub.test`, `thiago.romero@musicalclub.test`, `olivia.suarez@musicalclub.test`, `joaquin.pereyra@musicalclub.test`, `mia.fernandez@musicalclub.test`, `santino.diaz@musicalclub.test` |
-| Alumno 13+ | `martina.gomez@musicalclub.test`, `franco.iglesias@musicalclub.test`, `camila.ortiz@musicalclub.test`, `nicolas.vega@musicalclub.test`, `julieta.paredes@musicalclub.test`, `agustin.molina@musicalclub.test`, `renata.acosta@musicalclub.test` |
-| Responsable | `carolina.herrera@musicalclub.test` (Lola y Theo), `diego.herrera@musicalclub.test` (Lola) | El Talar |
+| Alumno 13+ | `juana.herrera@musicalclub.test`, `martina.gomez@musicalclub.test`, `franco.iglesias@musicalclub.test`, `camila.ortiz@musicalclub.test`, `nicolas.vega@musicalclub.test`, `julieta.paredes@musicalclub.test`, `agustin.molina@musicalclub.test`, `renata.acosta@musicalclub.test` |
+| Responsable | `carolina.herrera@musicalclub.test` (Lola, Theo y seguimiento de Juana), `diego.herrera@musicalclub.test` (Lola) | El Talar |
 
-Carolina y Diego entran con `MusicalClub2026` y administran kids sin mail ni contraseña: Lola Herrera (8, inscripta en Grupo Kids) y Theo Herrera (6). Liberar les crea la cuenta sobre el mismo perfil. Las edades del resto se calculan al correr el seed para que el grupo Kids siga teniendo menos de 12 y el otro 13 o más.
+Carolina y Diego entran con `MusicalClub2026` y administran kids sin mail ni contraseña: Lola Herrera (8, inscripta en Grupo Kids) y Theo Herrera (6). Liberar les crea la cuenta sobre el mismo perfil. Juana Herrera (15, `juana.herrera@musicalclub.test`) cursa Jóvenes el sábado y Carolina la sigue: ve clases, asistencia y cuotas, y puede pagar por Mercado Pago. Las edades del resto se calculan al correr el seed para que el grupo Kids siga teniendo menos de 12 y el otro 13 o más.
 
 El Talar tiene los sábados (Kids mensual y Jóvenes mensual, con lista de espera). Club Nordelta tiene los domingos (Kids y Jóvenes, cada 15 días). Joaquín cursa Kids en los dos barrios y Julieta cursa Jóvenes en los dos. El alta guarda el barrio en la cookie `mc_barrio` y en el perfil. Si no hay elección, la app usa el barrio del perfil y, si tampoco está, el primero por nombre. En la demo, Santiago y Gaby entran en El Talar.
 

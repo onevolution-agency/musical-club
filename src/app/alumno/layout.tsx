@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ChildSwitch } from "@/components/kids/family";
 import { AppShell } from "@/components/shell/app-shell";
 import { requireRole } from "@/modules/auth/session";
+import { followLabel } from "@/modules/follow/domain";
 import { chooseChild } from "@/modules/kids/actions";
 import { activeStudent } from "@/modules/kids/session";
 
@@ -19,7 +20,10 @@ export default async function Layout({ children }: { children: React.ReactNode }
           activeId={family.self ? "yo" : family.id}
           options={[
             { id: "yo", label: "Yo" },
-            ...family.children.map((child) => ({ id: child.id, label: child.full_name })),
+            ...family.children.map((child) => ({
+              id: child.id,
+              label: child.access === "follow" ? followLabel(child.full_name) : child.full_name,
+            })),
           ]}
         />
       ) : null}

@@ -26,6 +26,7 @@ const accounts = [
   "renata.acosta@musicalclub.test",
   "carolina.herrera@musicalclub.test",
   "diego.herrera@musicalclub.test",
+  "juana.herrera@musicalclub.test",
 ];
 
 describe("demo seed", () => {
@@ -48,6 +49,8 @@ describe("demo seed", () => {
     expect(seed).toContain("'kid'");
     expect(seed).toContain("Lola Herrera");
     expect(seed).toContain("Theo Herrera");
+    expect(seed).toContain("Juana Herrera");
+    expect(seed).toContain("'follow'");
     expect(seed).not.toContain("lola.herrera@");
   });
 });

@@ -8,6 +8,7 @@
 --   carolina.herrera@musicalclub.test administra a Lola y Theo
 --   diego.herrera@musicalclub.test administra a Lola
 -- Lola y Theo no tienen mail ni contraseña. Lola cursa Grupo Kids.
+--   juana.herrera@musicalclub.test (15) es alumna. Carolina la sigue (solo lectura).
 --
 -- Barrios de demo: El Talar (sábados, mensual) y Club Nordelta (domingos, cada 15 días).
 -- Santiago y Gaby son super admin y ven los dos. Valentina, Lucía, Joaquín y Julieta
@@ -30,6 +31,7 @@
 --   mia.fernandez@musicalclub.test
 --   santino.diaz@musicalclub.test
 -- Alumnos (13+)
+--   juana.herrera@musicalclub.test
 --   martina.gomez@musicalclub.test
 --   franco.iglesias@musicalclub.test
 --   camila.ortiz@musicalclub.test
@@ -114,6 +116,7 @@ begin
     ('c2222222-2222-4222-8222-000000000005', 'julieta.paredes@musicalclub.test', 'Julieta Paredes', 'student', '+54 9 11 5000-0105', '90113005', (today - interval '34 years')::date, null),
     ('c2222222-2222-4222-8222-000000000006', 'agustin.molina@musicalclub.test', 'Agustín Molina', 'student', '+54 9 11 5000-0106', '90113006', (today - interval '14 years')::date, 'Verónica Molina (mamá) · +54 9 11 5555-0206'),
     ('c2222222-2222-4222-8222-000000000007', 'renata.acosta@musicalclub.test', 'Renata Acosta', 'student', '+54 9 11 5000-0107', '90113007', (today - interval '39 years')::date, null),
+    ('d5555555-5555-4555-8555-000000000001', 'juana.herrera@musicalclub.test', 'Juana Herrera', 'student', '+54 9 11 5555-0188', '27115001', (today - interval '15 years')::date, 'Carolina Herrera (mamá) · +54 9 11 5555-0101'),
     ('d3333333-3333-4333-8333-000000000001', 'carolina.herrera@musicalclub.test', 'Carolina Herrera', 'student', '+54 9 11 5555-0101', '27111001', (today - interval '38 years')::date, null),
     ('d3333333-3333-4333-8333-000000000002', 'diego.herrera@musicalclub.test', 'Diego Herrera', 'student', '+54 9 11 5555-0190', '27111002', (today - interval '40 years')::date, null);
 
@@ -327,6 +330,37 @@ begin
     ('d3333333-3333-4333-8333-000000000001', 'd4444444-4444-4444-8444-000000000002', 'b1000000-0000-4000-8000-000000000001', 'manager')
   on conflict (guardian_id, child_id) do nothing;
 
+  insert into public.guardianships (guardian_id, child_id, barrio_id, access, ended_at, notify)
+  values (
+    'd3333333-3333-4333-8333-000000000001',
+    'd5555555-5555-4555-8555-000000000001',
+    'b1000000-0000-4000-8000-000000000001',
+    'follow',
+    null,
+    true
+  )
+  on conflict (guardian_id, child_id) do update
+    set access = 'follow',
+        barrio_id = excluded.barrio_id,
+        ended_at = null,
+        notify = true
+    where public.guardianships.access is distinct from 'manager';
+
+  insert into public.guardian_audit (child_id, guardian_id, actor_id, barrio_id, action, note)
+  select
+    'd5555555-5555-4555-8555-000000000001',
+    'd3333333-3333-4333-8333-000000000001',
+    'd3333333-3333-4333-8333-000000000001',
+    'b1000000-0000-4000-8000-000000000001',
+    'link',
+    'Juana Herrera'
+  where not exists (
+    select 1 from public.guardian_audit a
+    where a.child_id = 'd5555555-5555-4555-8555-000000000001'
+      and a.guardian_id = 'd3333333-3333-4333-8333-000000000001'
+      and a.action = 'link'
+  );
+
   insert into public.guardian_audit (child_id, guardian_id, actor_id, barrio_id, action, note)
   select v.child_id, v.guardian_id, v.guardian_id, v.barrio_id, 'create', v.note
   from (
@@ -403,7 +437,7 @@ begin
       '16:00',
       '18:30',
       'SUM cerrado',
-      5,
+      6,
       5600000,
       'ARS',
       'monthly',
@@ -473,7 +507,8 @@ begin
     'franco.iglesias@musicalclub.test',
     'camila.ortiz@musicalclub.test',
     'nicolas.vega@musicalclub.test',
-    'julieta.paredes@musicalclub.test'
+    'julieta.paredes@musicalclub.test',
+    'juana.herrera@musicalclub.test'
   );
 
   insert into public.enrollments (activity_id, student_id, status, starts_on, notes)
@@ -671,6 +706,7 @@ begin
     ('julieta.paredes@musicalclub.test', 'jovenes-y-adultos', 0, 'mp', null),
     ('julieta.paredes@musicalclub.test', 'jovenes-y-adultos', 1, 'mp', null),
     ('julieta.paredes@musicalclub.test', 'jovenes-y-adultos', 2, 'mp_today', null),
+    ('juana.herrera@musicalclub.test', 'jovenes-y-adultos', 0, 'mp', null),
     ('julieta.paredes@musicalclub.test', 'jovenes-domingo', 0, 'mp', null),
     ('julieta.paredes@musicalclub.test', 'jovenes-domingo', 1, 'cash_gaby', 'REC-1107'),
     ('agustin.molina@musicalclub.test', 'jovenes-domingo', 0, 'mp', null),

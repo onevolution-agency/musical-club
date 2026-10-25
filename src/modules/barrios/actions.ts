@@ -66,6 +66,7 @@ export async function saveBarrio(formData: FormData): Promise<ActionResult> {
     active,
     default_price_cents: Math.round(pricePesos * 100),
     default_billing_frequency: frequency as "monthly" | "biweekly",
+    teen_can_unfollow: formData.get("teenCanUnfollow") === "on",
   };
   if (!id && ctx.profile.role !== "super_admin") {
     return { ok: false, error: "No podés crear barrios." };
