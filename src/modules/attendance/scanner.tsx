@@ -4,7 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/brand/avatar";
 import { scanAttendance, type ScanResult } from "./actions";
 
-type RosterRow = { id: string; name: string; present: boolean; avatarUrl?: string | null };
+type RosterRow = {
+  id: string;
+  name: string;
+  present: boolean;
+  avatarUrl?: string | null;
+  kid?: boolean;
+  contact?: string | null;
+};
 
 export function Scanner({ sessionId, initialRoster }: { sessionId: string; initialRoster: RosterRow[] }) {
   const [roster, setRoster] = useState(initialRoster);
@@ -68,7 +75,8 @@ export function Scanner({ sessionId, initialRoster }: { sessionId: string; initi
           <li key={row.id}>
             <span className="person">
               <Avatar name={row.name} url={row.avatarUrl} size={44} />
-              {row.name} {row.present ? "· presente" : "· ausente"}
+              {row.name} {row.kid ? <span className="badge">Kid</span> : null} {row.present ? "· presente" : "· ausente"}
+              {row.contact ? <span className="hint">{row.contact}</span> : null}
             </span>
           </li>
         ))}

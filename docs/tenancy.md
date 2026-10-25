@@ -39,7 +39,7 @@ El bucket `avatars` queda con lectura pública. Insertar, actualizar o borrar so
 
 ## Cómo migrar un proyecto que ya tiene el seed
 
-En producción, `20261019043000` ya corrió. Aplicá solo `20261019120000_rls_initplan_fk_indexes.sql`.
+En producción, `20261019043000` ya corrió y `20261019120000_rls_initplan_fk_indexes.sql` también. La siguiente es `20261024120000_kids_guardians.sql` (cuentas Kids). Aplicála vos al mergear; no va sola a la base de producción.
 
 En una base nueva:
 
@@ -47,4 +47,4 @@ En una base nueva:
 2. Volvé a correr `npm run seed` (o `supabase db reset` en local). El seed es idempotente: reparte las actividades de sábado en El Talar y las de domingo en Club Nordelta, y arma las membresías. Si un barrio ya tiene `logo_url`, el seed no lo pisa.
 3. Entrá con `santiago.errecalde@musicalclub.test` / `MusicalClub2026`. El tablero arranca en el barrio de su perfil (El Talar en la demo).
 
-Las cuentas y la contraseña no cambian. No hay cuentas de padres: los menores siguen siendo alumnos y el adulto queda como contacto de emergencia.
+Las cuentas de siempre y la contraseña no cambian. Se suman Carolina y Diego Herrera (`@musicalclub.test`, `MusicalClub2026`) como responsables de Lola y Theo, perfiles kid sin usuario de Auth.

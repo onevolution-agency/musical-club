@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/modules/auth/session";
+import { canManageChild, activeStudent } from "@/modules/kids/session";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { todayInArgentina } from "@/lib/time";
 import { feesToVoidOnCancel, canEnroll } from "./domain";
@@ -10,6 +11,7 @@ import type { EnrollmentStatus } from "@/lib/supabase/database.types";
 
 export async function enrollSelf(formData: FormData): Promise<ActionResult> {
   const ctx = await requireRole(["student"]);
+  const family = await activeStudent(ctx);
   const activityId = String(formData.get("activityId") ?? "");
   if (!activityId) return { ok: false, error: "Falta la actividad." };
   const { data: activity } = await ctx.supabase.from("activities").select("*").eq("id", activityId).maybeSingle();
@@ -28,7 +30,7 @@ export async function enrollSelf(formData: FormData): Promise<ActionResult> {
     .from("enrollments")
     .select("*")
     .eq("activity_id", activityId)
-    .eq("student_id", ctx.userId)
+    .eq("student_id", family.id)
     .maybeSingle();
 
   if (existing && (existing.status === "active" || existing.status === "pending")) {
@@ -46,7 +48,7 @@ export async function enrollSelf(formData: FormData): Promise<ActionResult> {
   } else {
     const { error } = await ctx.supabase.from("enrollments").insert({
       activity_id: activityId,
-      student_id: ctx.userId,
+      student_id: family.id,
       status: nextStatus,
       starts_on: todayInArgentina(),
     });
@@ -64,7 +66,8 @@ export async function cancelEnrollment(formData: FormData): Promise<ActionResult
   const enrollmentId = String(formData.get("enrollmentId") ?? "");
   const { data: enrollment } = await ctx.supabase.from("enrollments").select("*").eq("id", enrollmentId).maybeSingle();
   if (!enrollment) return { ok: false, error: "No encontramos la inscripción." };
-  if (ctx.profile.role !== "admin" && enrollment.student_id !== ctx.userId) {
+  const manages = await canManageChild(ctx, enrollment.student_id);
+  if (ctx.profile.role !== "admin" && ctx.role !== "super_admin" && enrollment.student_id !== ctx.userId && !manages) {
     return { ok: false, error: "Esa inscripción no es tuya." };
   }
   const { error } = await ctx.supabase.from("enrollments").update({ status: "cancelled" }).eq("id", enrollmentId);

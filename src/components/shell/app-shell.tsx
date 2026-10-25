@@ -10,6 +10,7 @@ const links: Record<"student" | "teacher" | "admin", { href: string; label: stri
     { href: "/alumno", label: "Inicio", tab: true },
     { href: "/alumno/cuotas", label: "Cuotas", tab: true },
     { href: "/alumno/qr", label: "Mi QR", tab: true },
+    { href: "/alumno/hijos", label: "Hijos", tab: true },
     { href: "/alumno/perfil", label: "Perfil" },
   ],
   teacher: [

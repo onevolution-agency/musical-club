@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ActionForm, SubmitButton } from "@/components/ui/forms";
 import { requireRole, scopeBarrio } from "@/modules/auth/session";
+import { activeStudent } from "@/modules/kids/session";
 import { ageGroupCopy, frequencyLabel } from "@/modules/activities/labels";
 import { cancelEnrollment, enrollSelf } from "@/modules/enrollments/actions";
 import { formatARS } from "@/lib/time";
@@ -9,8 +10,9 @@ export const metadata: Metadata = { title: { absolute: "Actividades · Musical C
 
 export default async function StudentActivities() {
   const ctx = await requireRole(["student"]);
+  const family = await activeStudent(ctx);
   const { data: activities } = await scopeBarrio(ctx.supabase.from("activities").select("*").eq("status", "active").order("name"), ctx.barrioId);
-  const { data: mine } = await scopeBarrio(ctx.supabase.from("enrollments").select("*").eq("student_id", ctx.userId), ctx.barrioId);
+  const { data: mine } = await scopeBarrio(ctx.supabase.from("enrollments").select("*").eq("student_id", family.id), ctx.barrioId);
   return (
     <div className="stack">
       <h1 className="display" style={{ fontSize: "2.2rem" }}>
@@ -40,7 +42,7 @@ export default async function StudentActivities() {
             ) : (
               <ActionForm action={enrollSelf}>
                 <input type="hidden" name="activityId" value={activity.id} />
-                <SubmitButton>Inscribirme</SubmitButton>
+                <SubmitButton>{family.self ? "Inscribirme" : "Inscribir"}</SubmitButton>
               </ActionForm>
             )}
           </article>
