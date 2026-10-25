@@ -26,7 +26,7 @@ export default async function TeacherHome() {
         Tus clases
       </h1>
       {(activities ?? []).length === 0 ? (
-        <p className="empty">Todavía no tenés actividades asignadas. Pedile a un admin que te sume.</p>
+        <p className="empty">No tenés clases.</p>
       ) : null}
       {(activities ?? []).map((activity) => {
         const open = sessions?.find((session) => session.activity_id === activity.id && session.status === "open");
@@ -49,7 +49,7 @@ export default async function TeacherHome() {
         <h2 className="display" style={{ fontSize: "1.6rem" }}>
           Últimas sesiones
         </h2>
-        {(sessions ?? []).length === 0 ? <p className="empty">Cuando abras una clase, queda el historial.</p> : null}
+        {(sessions ?? []).length === 0 ? <p className="empty">No hay clases.</p> : null}
         <ul className="stars">
           {(sessions ?? []).map((session) => (
             <li key={session.id}>

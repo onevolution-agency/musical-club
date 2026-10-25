@@ -20,7 +20,7 @@ const credentials = z.object({
 });
 
 export async function signInWithPassword(formData: FormData): Promise<ActionResult> {
-  if (!isSupabaseConfigured()) return { ok: false, error: "Falta conectar Supabase." };
+  if (!isSupabaseConfigured()) return { ok: false, error: "No está disponible." };
   const parsed = credentials.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
@@ -38,7 +38,7 @@ export async function signInWithPassword(formData: FormData): Promise<ActionResu
 }
 
 export async function signInWithMagicLink(formData: FormData): Promise<ActionResult> {
-  if (!isSupabaseConfigured()) return { ok: false, error: "Falta conectar Supabase." };
+  if (!isSupabaseConfigured()) return { ok: false, error: "No está disponible." };
   const email = z.email().safeParse(formData.get("email"));
   if (!email.success) return { ok: false, error: "Ingresá un email válido." };
   const supabase = await createClient();
@@ -46,12 +46,12 @@ export async function signInWithMagicLink(formData: FormData): Promise<ActionRes
     email: email.data,
     options: { emailRedirectTo: `${siteUrl()}/auth/callback` },
   });
-  if (error) return { ok: false, error: "No pudimos enviar el enlace. Probá de nuevo." };
-  return { ok: true, message: "Te mandamos un enlace para entrar. Revisá tu correo." };
+  if (error) return { ok: false, error: "No pudimos enviar el enlace." };
+  return { ok: true, message: "Revisá tu correo." };
 }
 
 export async function signUp(formData: FormData): Promise<ActionResult> {
-  if (!isSupabaseConfigured()) return { ok: false, error: "Falta conectar Supabase." };
+  if (!isSupabaseConfigured()) return { ok: false, error: "No está disponible." };
   const parsed = credentials.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
@@ -75,9 +75,9 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
       data: { full_name: parsed.data.fullName, barrio_slug: barrio.slug },
     },
   });
-  if (error) return { ok: false, error: "No pudimos crear la cuenta. Si ya existe, ingresá." };
+  if (error) return { ok: false, error: "No pudimos crear la cuenta." };
   if (data.session) redirect("/alumno");
-  return { ok: true, message: "Revisá tu correo para confirmar la cuenta y después ingresá." };
+  return { ok: true, message: "Revisá tu correo." };
 }
 
 export async function signOut() {
@@ -118,7 +118,7 @@ export async function saveAvatarUrl(url: string): Promise<ActionResult> {
   if (!ctx) return { ok: false, error: "Tenés que ingresar." };
   const trimmed = url.trim();
   if (trimmed && !trimmed.includes(`/avatars/${ctx.userId}/`)) {
-    return { ok: false, error: "La foto no corresponde a tu usuario." };
+    return { ok: false, error: "No pudimos guardar la foto." };
   }
   const { error } = await ctx.supabase.from("profiles").update({ avatar_url: trimmed || null }).eq("id", ctx.userId);
   if (error) return { ok: false, error: "No pudimos guardar la foto." };

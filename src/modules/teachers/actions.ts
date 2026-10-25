@@ -16,7 +16,7 @@ export async function inviteStaff(formData: FormData): Promise<ActionResult> {
     role: formData.get("role") ?? "teacher",
   });
   if (!parsed.success) return { ok: false, error: fieldError(parsed.error) };
-  if (!ctx.barrioId) return { ok: false, error: "Elegí el barrio de la invitación." };
+  if (!ctx.barrioId) return { ok: false, error: "Falta el barrio." };
   const token = randomUUID();
   const expires = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
   const { error } = await ctx.supabase.from("staff_invites").insert({
@@ -35,7 +35,7 @@ export async function inviteStaff(formData: FormData): Promise<ActionResult> {
     revalidatePath("/admin/profesores");
     return {
       ok: true,
-      message: `Invitación creada. Cuando ${parsed.data.email} se registre, entra como ${parsed.data.role === "admin" ? "admin" : "profe"}. Para mandar el mail automático falta SUPABASE_SERVICE_ROLE_KEY.`,
+      message: "Invitación guardada.",
     };
   }
 
@@ -48,7 +48,7 @@ export async function inviteStaff(formData: FormData): Promise<ActionResult> {
     });
     await admin.from("staff_invites").update({ accepted_at: new Date().toISOString() }).eq("token", token);
     revalidatePath("/admin/profesores");
-    return { ok: true, message: "Esa persona ya tenía cuenta. Actualizamos el rol." };
+    return { ok: true, message: "Rol actualizado." };
   }
 
   const { error: inviteError } = await admin.auth.admin.inviteUserByEmail(parsed.data.email, {
@@ -57,9 +57,9 @@ export async function inviteStaff(formData: FormData): Promise<ActionResult> {
   });
   revalidatePath("/admin/profesores");
   if (inviteError) {
-    return { ok: true, message: "Guardamos la invitación, pero el mail no salió. Revisá el Auth de Supabase." };
+    return { ok: true, message: "Invitación guardada. El mail no salió." };
   }
-  return { ok: true, message: "Enviamos la invitación." };
+  return { ok: true, message: "Invitación enviada." };
 }
 
 export async function setUserRole(formData: FormData): Promise<ActionResult> {
@@ -67,8 +67,8 @@ export async function setUserRole(formData: FormData): Promise<ActionResult> {
   const userId = String(formData.get("userId") ?? "");
   const role = String(formData.get("role") ?? "");
   if (role !== "student" && role !== "teacher" && role !== "admin") return { ok: false, error: "Rol inválido." };
-  if (!ctx.barrioId) return { ok: false, error: "Elegí un barrio para cambiar el rol." };
-  if (userId === ctx.userId && role !== "admin") return { ok: false, error: "No te quites el rol de admin desde acá." };
+  if (!ctx.barrioId) return { ok: false, error: "Falta el barrio." };
+  if (userId === ctx.userId && role !== "admin") return { ok: false, error: "No podés sacarte el rol." };
   const { error } = await ctx.supabase.from("barrio_memberships").upsert({
     user_id: userId,
     barrio_id: ctx.barrioId,

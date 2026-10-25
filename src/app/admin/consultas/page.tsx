@@ -15,7 +15,7 @@ export default async function InquiriesPage() {
       <h1 className="display" style={{ fontSize: "2.2rem" }}>
         Consultas
       </h1>
-      {(inquiries ?? []).length === 0 ? <p className="empty">Todavía no entró ninguna consulta.</p> : null}
+      {(inquiries ?? []).length === 0 ? <p className="empty">No hay consultas.</p> : null}
       {(inquiries ?? []).map((inquiry) => (
         <article key={inquiry.id} className="panel">
           <h2 className="display" style={{ fontSize: "1.4rem" }}>
