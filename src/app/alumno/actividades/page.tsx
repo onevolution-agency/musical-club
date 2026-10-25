@@ -18,7 +18,7 @@ export default async function StudentActivities() {
       <h1 className="display" style={{ fontSize: "2.2rem" }}>
         Actividades
       </h1>
-      {(activities ?? []).length === 0 ? <p className="empty">Todavía no hay grupos publicados.</p> : null}
+      {(activities ?? []).length === 0 ? <p className="empty">No hay grupos.</p> : null}
       {(activities ?? []).map((activity) => {
         const enrollment = mine?.find((item) => item.activity_id === activity.id);
         const active = enrollment && ["active", "pending", "waitlist"].includes(enrollment.status);

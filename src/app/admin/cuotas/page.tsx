@@ -28,7 +28,6 @@ export default async function AdminFees({ searchParams }: { searchParams: Promis
       <h1 className="display" style={{ fontSize: "2.2rem" }}>
         Cuotas
       </h1>
-      <p>La frecuencia y el monto salen de cada actividad. El default es mensual; también podés usar cada 15 días.</p>
       <ActionForm action={generateFees} className="panel row">
         <label className="field">
           <span>Generar hasta</span>
@@ -65,7 +64,7 @@ export default async function AdminFees({ searchParams }: { searchParams: Promis
           CSV
         </a>
       </form>
-      {(fees ?? []).length === 0 ? <p className="empty">No hay cuotas. Cargá un precio y generá el período.</p> : null}
+      {(fees ?? []).length === 0 ? <p className="empty">No hay cuotas.</p> : null}
       {(fees ?? []).map((fee) => {
         const related = (payments ?? []).filter((payment) => payment.fee_id === fee.id);
         const snapshots: PaymentSnapshot[] = related.map((payment) => ({
@@ -116,7 +115,6 @@ export default async function AdminFees({ searchParams }: { searchParams: Promis
                   <span>Comprobante</span>
                   <input name="receipt" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" />
                 </label>
-                <p className="hint">Lo recibe el admin que está logueado. Solo efectivo.</p>
                 <SubmitButton>Registrar efectivo</SubmitButton>
               </ActionForm>
             ) : null}

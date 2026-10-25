@@ -21,18 +21,17 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
   const { data: activities } = await ctx.supabase.from("activities").select("id, name");
   const notice =
     params.pago === "ok"
-      ? "Si Mercado Pago acreditó el pago, la cuota se actualiza en unos segundos."
+      ? "Pago enviado."
       : params.pago === "error"
-        ? "El pago no se completó. Podés intentarlo de nuevo."
+        ? "El pago no se completó."
         : null;
   return (
     <div className="stack">
       <h1 className="display" style={{ fontSize: "2.2rem" }}>
         Cuotas
       </h1>
-      <p>Pagás vos por Mercado Pago. Si abonás en efectivo, un admin lo carga y lo ves acá.</p>
       {notice ? <p className="form-ok">{notice}</p> : null}
-      {(fees ?? []).length === 0 ? <p className="empty">Cuando la administración genere el período, las cuotas aparecen acá.</p> : null}
+      {(fees ?? []).length === 0 ? <p className="empty">No hay cuotas.</p> : null}
       {(fees ?? []).map((fee) => {
         const related = (payments ?? []).filter((payment) => payment.fee_id === fee.id);
         const snapshots: PaymentSnapshot[] = related.map((payment) => ({
@@ -72,7 +71,7 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
         <h2 className="display" style={{ fontSize: "1.6rem" }}>
           Historial de pagos
         </h2>
-        {(payments ?? []).length === 0 ? <p className="empty">Todavía no hay pagos.</p> : null}
+        {(payments ?? []).length === 0 ? <p className="empty">No hay pagos.</p> : null}
         <div className="table-wrap">
           <table>
             <thead>

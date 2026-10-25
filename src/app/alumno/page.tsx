@@ -54,7 +54,7 @@ export default async function StudentHome() {
         </h2>
         {(enrollments ?? []).length === 0 ? (
           <p className="empty">
-            Todavía no tenés actividades. <Link href="/alumno/actividades">Mirá los grupos</Link>.
+            No tenés actividades. <Link href="/alumno/actividades">Ver grupos</Link>
           </p>
         ) : (
           <div className="card-list">

@@ -25,7 +25,7 @@ export default async function TeacherHistory() {
       <h1 className="display" style={{ fontSize: "2.2rem" }}>
         Historial
       </h1>
-      {(sessions ?? []).length === 0 ? <p className="empty">Todavía no hay clases tomadas.</p> : null}
+      {(sessions ?? []).length === 0 ? <p className="empty">No hay clases.</p> : null}
       <div className="table-wrap">
         <table>
           <thead>

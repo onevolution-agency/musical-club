@@ -8,7 +8,7 @@ import type { ActionResult } from "@/modules/auth/actions";
 
 export async function sendInquiry(formData: FormData): Promise<ActionResult> {
   if (!isSupabaseConfigured()) {
-    return { ok: false, error: "El formulario se habilita cuando el sitio está conectado a Supabase." };
+    return { ok: false, error: "El formulario no está disponible." };
   }
   const parsed = inquirySchema.safeParse({
     name: formData.get("name"),
@@ -31,6 +31,6 @@ export async function sendInquiry(formData: FormData): Promise<ActionResult> {
     barrio_id: barrio?.id ?? null,
     message: parsed.data.message,
   });
-  if (error) return { ok: false, error: "No pudimos enviar la consulta. Probá de nuevo." };
+  if (error) return { ok: false, error: "No pudimos enviar la consulta." };
   return { ok: true, message: "Recibimos tu consulta. Te vamos a escribir." };
 }

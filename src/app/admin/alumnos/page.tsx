@@ -32,7 +32,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
         </label>
         <button className="btn btn-gold">Buscar</button>
       </form>
-      {(students ?? []).length === 0 ? <p className="empty">No hay alumnos con ese filtro.</p> : null}
+      {(students ?? []).length === 0 ? <p className="empty">No hay alumnos.</p> : null}
       <div className="table-wrap">
         <table>
           <thead>

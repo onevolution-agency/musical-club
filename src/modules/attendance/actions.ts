@@ -61,7 +61,7 @@ async function mark(sessionId: string, studentId: string, method: "qr" | "manual
 
 export async function scanAttendance(sessionId: string, token: string): Promise<ScanResult> {
   const secret = attendanceSecret();
-  if (!secret) return { ok: false, code: "invalid_qr", message: "Falta ATTENDANCE_QR_SECRET en el servidor." };
+  if (!secret) return { ok: false, code: "invalid_qr", message: "No pudimos leer el QR." };
   const studentId = verifyStudentQr(token, secret);
   if (!studentId) return { ok: false, code: "invalid_qr", message: attendanceMessage("invalid_qr") };
   return mark(sessionId, studentId, "qr");

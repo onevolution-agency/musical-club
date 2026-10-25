@@ -95,7 +95,7 @@ export async function generateFees(formData?: FormData): Promise<ActionResult> {
       });
     }
   }
-  if (!rows.length) return { ok: true, message: "No había cuotas nuevas para generar." };
+  if (!rows.length) return { ok: true, message: "No hay cuotas nuevas." };
   const { error } = await admin.from("fees").insert(rows);
   if (error) return { ok: false, error: "No pudimos generar las cuotas." };
   revalidatePath("/admin/cuotas");
@@ -140,7 +140,7 @@ export async function registerCash(formData: FormData): Promise<ActionResult> {
   if (file instanceof File && file.size > 0) {
     const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
     if (!allowed.includes(file.type) || file.size > 5_000_000) {
-      return { ok: false, error: "El comprobante tiene que ser JPG, PNG, WEBP o PDF de hasta 5 MB." };
+      return { ok: false, error: "Usá JPG, PNG, WEBP o PDF de hasta 5 MB." };
     }
     const extension = file.type === "application/pdf" ? "pdf" : file.type.split("/")[1];
     receiptPath = `${fee.student_id}/${paymentId}.${extension}`;
@@ -171,7 +171,7 @@ export async function registerCash(formData: FormData): Promise<ActionResult> {
   revalidatePath("/admin/cuotas");
   revalidatePath("/admin");
   revalidatePath("/alumno/cuotas");
-  return { ok: true, message: "Efectivo registrado. La cuota quedó actualizada." };
+  return { ok: true, message: "Efectivo registrado." };
 }
 
 export async function voidCashPayment(formData: FormData): Promise<ActionResult> {
@@ -216,7 +216,7 @@ export async function voidCashPayment(formData: FormData): Promise<ActionResult>
 export async function startMercadoPagoCheckout(formData: FormData): Promise<ActionResult> {
   const ctx = await requireRole(["student"]);
   const token = mercadoPagoToken();
-  if (!token) return { ok: false, error: "Los pagos en línea todavía no están habilitados." };
+  if (!token) return { ok: false, error: "El pago no está disponible." };
   const feeId = String(formData.get("feeId") ?? "");
   const { data: fee } = await ctx.supabase.from("fees").select("*").eq("id", feeId).maybeSingle();
   const manages = fee ? await canManageChild(ctx, fee.student_id) : false;
@@ -242,8 +242,8 @@ export async function startMercadoPagoCheckout(formData: FormData): Promise<Acti
       pendingUrl: `${origin}/alumno/cuotas?pago=pendiente`,
       failureUrl: `${origin}/alumno/cuotas?pago=error`,
     });
-  } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : "Mercado Pago no respondió." };
+  } catch {
+    return { ok: false, error: "No pudimos iniciar el pago." };
   }
   const { error } = await ctx.supabase.from("payments").insert({
     id: paymentId,
@@ -264,7 +264,7 @@ export async function syncMercadoPagoPayment(formData: FormData): Promise<Action
   const ctx = await requireRole(["student", "admin"]);
   const token = mercadoPagoToken();
   const admin = createAdminClient();
-  if (!token || !admin) return { ok: false, error: "Falta la credencial de Mercado Pago o la service role." };
+  if (!token || !admin) return { ok: false, error: "El pago no está disponible." };
   const paymentId = String(formData.get("paymentId") ?? "");
   const { data: payment } = await admin.from("payments").select("*").eq("id", paymentId).maybeSingle();
   if (!payment || payment.method !== "mercadopago") return { ok: false, error: "Ese pago no es de Mercado Pago." };
@@ -277,10 +277,10 @@ export async function syncMercadoPagoPayment(formData: FormData): Promise<Action
     return { ok: false, error: "Ese pago no es tuyo." };
   }
   if (!payment.mp_payment_id && payment.status === "pending") {
-    return { ok: true, message: "Todavía no llegó la confirmación. Si ya pagaste, esperá unos minutos." };
+    return { ok: true, message: "Falta la confirmación." };
   }
-  if (payment.status === "approved") return { ok: true, message: "Ese pago ya está acreditado." };
-  return { ok: true, message: "Cuando Mercado Pago avise, la cuota se actualiza sola." };
+  if (payment.status === "approved") return { ok: true, message: "Pago acreditado." };
+  return { ok: true, message: "Esperando la confirmación." };
 }
 
 export async function applyMercadoPagoNotification(input: {

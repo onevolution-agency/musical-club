@@ -52,7 +52,7 @@ export function Scanner({ sessionId, initialRoster }: { sessionId: string; initi
           () => undefined,
         );
       } catch {
-        if (!cancelled) setCameraError("No pudimos abrir la cámara. Marcá la lista a mano.");
+        if (!cancelled) setCameraError("No pudimos abrir la cámara.");
       }
     })();
     return () => {
@@ -64,7 +64,7 @@ export function Scanner({ sessionId, initialRoster }: { sessionId: string; initi
   return (
     <div className="scanner-shell">
       <div id="qr-reader" />
-      {cameraError ? <p className="form-error">{cameraError}</p> : <p className="hint">Apuntá al QR del alumno. Si ya estaba, no se duplica.</p>}
+      {cameraError ? <p className="form-error">{cameraError}</p> : <p className="hint">Apuntá al QR.</p>}
       {feedback ? (
         <p className={feedback.ok ? "feedback feedback-ok" : "feedback feedback-bad"} role="status" aria-live="polite">
           {feedback.ok ? <Avatar name={feedback.message} url={feedback.avatarUrl} size={44} /> : null} {feedback.message}
