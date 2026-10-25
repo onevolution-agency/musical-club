@@ -22,7 +22,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </h1>
         {!isSupabaseConfigured() ? (
           <p className="form-error" role="status">
-            Falta conectar Supabase. Completá las variables de `.env.example`.
+            El ingreso no está disponible.
           </p>
         ) : null}
         <ActionForm action={signInWithPassword} className="panel" >

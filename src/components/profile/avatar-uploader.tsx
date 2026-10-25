@@ -18,11 +18,11 @@ async function compress(file: File): Promise<Blob> {
   canvas.width = Math.max(1, Math.round(bitmap.width * scale));
   canvas.height = Math.max(1, Math.round(bitmap.height * scale));
   const context = canvas.getContext("2d");
-  if (!context) throw new Error("No pudimos procesar la foto.");
+  if (!context) throw new Error("No pudimos subir la foto.");
   context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   bitmap.close();
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.82));
-  if (!blob) throw new Error("No pudimos comprimir la foto.");
+  if (!blob) throw new Error("No pudimos subir la foto.");
   return blob;
 }
 
@@ -42,7 +42,7 @@ export function AvatarUploader({ userId, name, url }: { userId: string; name: st
     try {
       const blob = await compress(file);
       const supabase = createBrowserClientConfigured();
-      if (!supabase) throw new Error("Falta conectar Supabase para subir la foto.");
+      if (!supabase) throw new Error("No pudimos subir la foto.");
       const path = `${userId}/avatar.jpg`;
       const { error: uploadError } = await supabase.storage.from("avatars").upload(path, blob, {
         upsert: true,
@@ -69,7 +69,7 @@ export function AvatarUploader({ userId, name, url }: { userId: string; name: st
       <label className="field" style={{ margin: 0, flex: 1 }}>
         <span>Foto de perfil</span>
         <input type="file" accept="image/jpeg,image/png,image/webp" onChange={onChange} disabled={busy} />
-        <span className="hint">{busy ? "Subiendo…" : "JPG, PNG o WebP, hasta 2 MB. La achicamos a 512 px."}</span>
+        {busy ? <span className="hint">Subiendo…</span> : null}
       </label>
       {message ? <p className="form-ok">{message}</p> : null}
       {error ? <p className="form-error">{error}</p> : null}

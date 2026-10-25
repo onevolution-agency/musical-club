@@ -13,16 +13,15 @@ export default async function QrPage() {
   if (family.mode === "follow") return <p className="empty">No disponible.</p>;
   const secret = attendanceSecret();
   if (!secret) {
-    return <p className="form-error">Falta configurar ATTENDANCE_QR_SECRET para generar el código.</p>;
+    return <p className="form-error">No pudimos armar el QR.</p>;
   }
   const token = signStudentQr(family.id, secret);
   const dataUrl = await QRCode.toDataURL(token, { margin: 1, width: 480, errorCorrectionLevel: "M" });
   return (
     <div className="stack">
       <h1 className="display" style={{ fontSize: "2.2rem" }}>
-        {family.self ? "Tu QR de asistencia" : family.profile.full_name}
+        {family.self ? "Tu QR" : family.profile.full_name}
       </h1>
-      <p>Mostrale este código al profe cuando entres. Sirve una sola vez por clase.</p>
       <div className="qr-frame">
         {/* El QR es un data URL generado en el servidor. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}

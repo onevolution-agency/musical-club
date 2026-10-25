@@ -17,7 +17,6 @@ export default async function RegisterPage() {
         <h1 className="display" style={{ fontSize: "3rem" }}>
           Creá tu cuenta
         </h1>
-        <p>La cuenta nueva entra como alumno del barrio que elijas. A los profes los invita la administración.</p>
         <ActionForm action={signUp} className="panel">
           <label className="field">
             <span>Tu barrio</span>

@@ -3,7 +3,7 @@
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 export function Bars({ data, label }: { data: { name: string; value: number }[]; label: string }) {
-  if (data.length === 0) return <p className="empty">Sin datos para {label}.</p>;
+  if (data.length === 0) return <p className="empty">Sin datos.</p>;
   return (
     <div className="panel" style={{ height: 260 }}>
       <h3 className="display" style={{ fontSize: "1.2rem" }}>

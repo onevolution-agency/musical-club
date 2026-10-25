@@ -33,7 +33,7 @@ export default async function AdminAttendance({ searchParams }: { searchParams: 
           CSV
         </a>
       </form>
-      {(sessions ?? []).length === 0 ? <p className="empty">No hay clases en ese filtro.</p> : null}
+      {(sessions ?? []).length === 0 ? <p className="empty">No hay clases.</p> : null}
       <div className="table-wrap">
         <table>
           <thead>
